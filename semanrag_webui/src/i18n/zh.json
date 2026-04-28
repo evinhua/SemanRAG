@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "chat": "聊天",
+    "graph": "知识图谱",
+    "documents": "文档",
+    "admin": "管理",
+    "settings": "设置"
+  },
+  "chat": {
+    "placeholder": "输入问题...",
+    "send": "发送",
+    "newConversation": "新对话",
+    "noMessages": "开始对话",
+    "sources": "来源",
+    "streaming": "生成中..."
+  },
+  "graph": {
+    "title": "知识图谱",
+    "nodes": "节点",
+    "edges": "边",
+    "communities": "社区",
+    "layout": "布局",
+    "filters": "筛选",
+    "neighborhood": "邻域",
+    "path": "查找路径"
+  },
+  "documents": {
+    "title": "文档",
+    "upload": "上传文档",
+    "insertText": "插入文本",
+    "delete": "删除",
+    "status": "状态",
+    "size": "大小",
+    "created": "创建时间"
+  },
+  "admin": {
+    "title": "管理",
+    "users": "用户",
+    "groups": "分组",
+    "budget": "预算",
+    "audit": "审计日志",
+    "costs": "成本报告"
+  },
+  "settings": {
+    "title": "设置",
+    "theme": "主题",
+    "language": "语言",
+    "density": "密度",
+    "colorBlind": "色盲模式",
+    "keybindings": "快捷键"
+  },
+  "common": {
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "confirm": "确认",
+    "loading": "加载中...",
+    "error": "发生错误",
+    "success": "成功",
+    "search": "搜索...",
+    "noResults": "未找到结果",
+    "login": "登录",
+    "logout": "退出"
+  }
+}

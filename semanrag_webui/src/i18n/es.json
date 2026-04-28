@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "chat": "Chat",
+    "graph": "Grafo de Conocimiento",
+    "documents": "Documentos",
+    "admin": "Administración",
+    "settings": "Configuración"
+  },
+  "chat": {
+    "placeholder": "Haz una pregunta...",
+    "send": "Enviar",
+    "newConversation": "Nueva Conversación",
+    "noMessages": "Inicia una conversación",
+    "sources": "Fuentes",
+    "streaming": "Generando..."
+  },
+  "graph": {
+    "title": "Grafo de Conocimiento",
+    "nodes": "Nodos",
+    "edges": "Aristas",
+    "communities": "Comunidades",
+    "layout": "Diseño",
+    "filters": "Filtros",
+    "neighborhood": "Vecindario",
+    "path": "Buscar Ruta"
+  },
+  "documents": {
+    "title": "Documentos",
+    "upload": "Subir Documento",
+    "insertText": "Insertar Texto",
+    "delete": "Eliminar",
+    "status": "Estado",
+    "size": "Tamaño",
+    "created": "Creado"
+  },
+  "admin": {
+    "title": "Administración",
+    "users": "Usuarios",
+    "groups": "Grupos",
+    "budget": "Presupuesto",
+    "audit": "Registro de Auditoría",
+    "costs": "Informe de Costos"
+  },
+  "settings": {
+    "title": "Configuración",
+    "theme": "Tema",
+    "language": "Idioma",
+    "density": "Densidad",
+    "colorBlind": "Modo Daltónico",
+    "keybindings": "Atajos de Teclado"
+  },
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "confirm": "Confirmar",
+    "loading": "Cargando...",
+    "error": "Ocurrió un error",
+    "success": "Éxito",
+    "search": "Buscar...",
+    "noResults": "Sin resultados",
+    "login": "Iniciar Sesión",
+    "logout": "Cerrar Sesión"
+  }
+}

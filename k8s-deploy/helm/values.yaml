@@ -1,0 +1,48 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/semanrag/semanrag
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 9621
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: "2"
+    memory: 4Gi
+
+env:
+  LLM_BINDING: google-genai
+  LLM_MODEL: gemini-2.0-flash
+  EMBEDDING_BINDING: google-genai
+  EMBEDDING_MODEL: text-embedding-004
+  KG_STORAGE: networkx
+  VECTOR_STORAGE: nano-vectordb
+  DOC_STORAGE: json
+  WORKING_DIR: /app/data
+  API_PORT: "9621"
+  LOG_LEVEL: INFO
+
+envSecrets: {}
+  # LLM_API_KEY: semanrag-secrets
+
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: ""
+  accessMode: ReadWriteOnce
+
+healthcheck:
+  path: /health
+  initialDelaySeconds: 10
+  periodSeconds: 30
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

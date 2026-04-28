@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "chat": "Chat",
+    "graph": "Knowledge Graph",
+    "documents": "Documents",
+    "admin": "Admin",
+    "settings": "Settings"
+  },
+  "chat": {
+    "placeholder": "Ask a question...",
+    "send": "Send",
+    "newConversation": "New Conversation",
+    "noMessages": "Start a conversation",
+    "sources": "Sources",
+    "streaming": "Generating..."
+  },
+  "graph": {
+    "title": "Knowledge Graph",
+    "nodes": "Nodes",
+    "edges": "Edges",
+    "communities": "Communities",
+    "layout": "Layout",
+    "filters": "Filters",
+    "neighborhood": "Neighborhood",
+    "path": "Find Path"
+  },
+  "documents": {
+    "title": "Documents",
+    "upload": "Upload Document",
+    "insertText": "Insert Text",
+    "delete": "Delete",
+    "status": "Status",
+    "size": "Size",
+    "created": "Created"
+  },
+  "admin": {
+    "title": "Administration",
+    "users": "Users",
+    "groups": "Groups",
+    "budget": "Budget",
+    "audit": "Audit Log",
+    "costs": "Cost Report"
+  },
+  "settings": {
+    "title": "Settings",
+    "theme": "Theme",
+    "language": "Language",
+    "density": "Density",
+    "colorBlind": "Color Blind Mode",
+    "keybindings": "Keybindings"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "search": "Search...",
+    "noResults": "No results found",
+    "login": "Log In",
+    "logout": "Log Out"
+  }
+}

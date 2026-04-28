@@ -1,0 +1,31 @@
+[storage]
+# Options: networkx | neo4j
+kg_backend = networkx
+# Options: nano-vectordb | milvus | qdrant
+vector_backend = nano-vectordb
+# Options: json | mongodb
+doc_backend = json
+working_dir = ./data
+
+[llm]
+model = gemini-2.0-flash
+binding = google-genai
+api_key =
+api_base =
+max_tokens = 4096
+temperature = 0.0
+max_retries = 3
+retry_delay = 1.0
+
+[embedding]
+model = text-embedding-004
+binding = google-genai
+api_key =
+api_base =
+dimension = 768
+batch_size = 64
+
+[safety]
+enabled = false
+# Comma-separated presidio entity types
+entities = PERSON,EMAIL_ADDRESS,PHONE_NUMBER

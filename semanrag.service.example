@@ -1,0 +1,32 @@
+[Unit]
+Description=SemanRAG API Server
+Documentation=https://github.com/semanrag/semanrag
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=semanrag
+Group=semanrag
+WorkingDirectory=/opt/semanrag
+EnvironmentFile=/opt/semanrag/.env
+ExecStart=/opt/semanrag/.venv/bin/semanrag serve --host 0.0.0.0 --port 9621 --workers 4
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=semanrag
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/semanrag/data
+PrivateTmp=true
+
+# Resource limits
+LimitNOFILE=65536
+MemoryMax=8G
+
+[Install]
+WantedBy=multi-user.target

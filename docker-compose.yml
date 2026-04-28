@@ -1,0 +1,19 @@
+services:
+  semanrag-api:
+    build: .
+    container_name: semanrag-api
+    ports:
+      - "9621:9621"
+    env_file: .env
+    volumes:
+      - semanrag-data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9621/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+    restart: unless-stopped
+
+volumes:
+  semanrag-data:

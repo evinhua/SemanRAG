@@ -1,0 +1,81 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: semanrag
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: semanrag-data
+  namespace: semanrag
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: semanrag
+  namespace: semanrag
+  labels:
+    app: semanrag
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: semanrag
+  template:
+    metadata:
+      labels:
+        app: semanrag
+    spec:
+      containers:
+        - name: semanrag
+          image: ghcr.io/semanrag/semanrag:latest
+          ports:
+            - containerPort: 9621
+          envFrom:
+            - secretRef:
+                name: semanrag-env
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 9621
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 9621
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: semanrag-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: semanrag
+  namespace: semanrag
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9621
+      targetPort: 9621
+      protocol: TCP
+  selector:
+    app: semanrag

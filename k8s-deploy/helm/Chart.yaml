@@ -1,0 +1,15 @@
+apiVersion: v2
+name: semanrag
+description: SemanRAG — Semantic, Graph-Augmented RAG
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - rag
+  - knowledge-graph
+  - llm
+maintainers:
+  - name: SemanRAG Contributors
+home: https://github.com/semanrag/semanrag
+sources:
+  - https://github.com/semanrag/semanrag

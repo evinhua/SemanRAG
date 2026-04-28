@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "chat": "チャット",
+    "graph": "ナレッジグラフ",
+    "documents": "ドキュメント",
+    "admin": "管理",
+    "settings": "設定"
+  },
+  "chat": {
+    "placeholder": "質問を入力...",
+    "send": "送信",
+    "newConversation": "新しい会話",
+    "noMessages": "会話を始めましょう",
+    "sources": "ソース",
+    "streaming": "生成中..."
+  },
+  "graph": {
+    "title": "ナレッジグラフ",
+    "nodes": "ノード",
+    "edges": "エッジ",
+    "communities": "コミュニティ",
+    "layout": "レイアウト",
+    "filters": "フィルター",
+    "neighborhood": "近傍",
+    "path": "パス検索"
+  },
+  "documents": {
+    "title": "ドキュメント",
+    "upload": "アップロード",
+    "insertText": "テキスト挿入",
+    "delete": "削除",
+    "status": "ステータス",
+    "size": "サイズ",
+    "created": "作成日"
+  },
+  "admin": {
+    "title": "管理",
+    "users": "ユーザー",
+    "groups": "グループ",
+    "budget": "予算",
+    "audit": "監査ログ",
+    "costs": "コストレポート"
+  },
+  "settings": {
+    "title": "設定",
+    "theme": "テーマ",
+    "language": "言語",
+    "density": "表示密度",
+    "colorBlind": "色覚サポート",
+    "keybindings": "キーバインド"
+  },
+  "common": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "confirm": "確認",
+    "loading": "読み込み中...",
+    "error": "エラーが発生しました",
+    "success": "成功",
+    "search": "検索...",
+    "noResults": "結果なし",
+    "login": "ログイン",
+    "logout": "ログアウト"
+  }
+}
