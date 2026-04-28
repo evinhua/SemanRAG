@@ -54,9 +54,17 @@ semanrag serve
 
 # Or use uvicorn directly
 uvicorn semanrag.api.semanrag_server:app --host 0.0.0.0 --port 9621
+
+# Or with Docker (includes frontend)
+docker compose up -d
+
+# Full stack (API + Postgres + Neo4j + Redis + Milvus + monitoring)
+docker compose -f docker-compose-full.yml up -d
 ```
 
 The server starts at `http://localhost:9621` with Swagger docs at `/docs`.
+
+Frontend pages: `/chat`, `/explore` (graph), `/files` (documents), `/admin-panel`, `/settings`.
 
 ---
 
@@ -115,6 +123,46 @@ rag = SemanRAG(
         embedding_dim=1536,
         max_token_size=8192,
         func=lambda texts: openai_embed(texts, model="text-embedding-3-small"),
+    ),
+)
+```
+
+### Using with Azure OpenAI
+
+Set in `.env`:
+```bash
+LLM_BINDING=azure-openai
+LLM_MODEL=your-deployment-name
+LLM_API_KEY=your-key
+LLM_API_BASE=https://your-resource.openai.azure.com
+LLM_API_VERSION=2024-12-01-preview
+EMBEDDING_MODEL=text-embedding-3-large
+EMBEDDING_DIMENSION=3072
+```
+
+Or programmatically:
+```python
+from functools import partial
+from semanrag.semanrag import SemanRAG
+from semanrag.llm.openai_impl import azure_openai_complete_if_cache, azure_openai_embed
+from semanrag.utils import EmbeddingFunc
+
+rag = SemanRAG(
+    working_dir="./data",
+    llm_model_func=partial(
+        azure_openai_complete_if_cache, "your-deployment",
+        api_key="your-key",
+        base_url="https://your-resource.openai.azure.com",
+    ),
+    embedding_func=EmbeddingFunc(
+        embedding_dim=3072,
+        max_token_size=8192,
+        func=partial(
+            azure_openai_embed,
+            model="text-embedding-3-large",
+            api_key="your-key",
+            base_url="https://your-resource.openai.azure.com",
+        ),
     ),
 )
 ```
@@ -206,7 +254,9 @@ npm install   # or: bun install
 npm run dev   # starts at http://localhost:5173, proxies API to :9621
 ```
 
-Features: graph explorer (sigma.js), multi-turn chat with all 6 retrieval modes, document manager with drag-and-drop upload, admin console with token usage dashboards.
+Features: D3 force-directed graph explorer, multi-turn chat with all 6 retrieval modes, document manager with drag-and-drop upload and progress bar, admin console with token usage dashboards.
+
+Pages: `/chat`, `/explore` (graph), `/files` (documents), `/admin-panel`, `/settings`.
 
 ---
 
@@ -280,6 +330,8 @@ docker compose up -d
 # Full stack (API + Postgres + Neo4j + Redis + Milvus + monitoring)
 docker compose -f docker-compose-full.yml up -d
 ```
+
+The Docker image includes the frontend build. Access everything at `http://localhost:9621`.
 
 ### Kubernetes
 
@@ -396,9 +448,13 @@ make lint                    # ruff
 make typecheck               # mypy
 
 # Frontend
-make frontend-install        # bun install
-make frontend-dev            # dev server
+make frontend-install        # npm install
+make frontend-dev            # dev server at :5173
 make frontend-build          # production build
+
+# Docker
+docker compose -f docker-compose-full.yml up -d    # full stack
+docker compose -f docker-compose-full.yml build --no-cache semanrag-api  # rebuild
 ```
 
 ---
