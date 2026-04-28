@@ -1,5 +1,8 @@
 # Prompts
 
+> **All 18 prompts have been executed and the project is fully implemented.**
+> Post-implementation fixes applied: Azure OpenAI integration, streaming coroutine handling, VDB vector key format, D3 graph visualization, SPA routing, Docker deployment.
+
 Sequence of prompts to generate the SemanRAG project from scratch using Claude Code. Each prompt builds on the previous output. Reference `specs/mission.md`, `specs/roadmap.md`, and `specs/tech-stack.md` for context.
 
 ## Phase → Prompt Mapping

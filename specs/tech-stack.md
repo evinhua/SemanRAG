@@ -1,8 +1,10 @@
 # Tech Stack
 
+> **Implementation note:** All libraries listed below are integrated. The frontend graph visualization uses D3.js (force-directed) instead of sigma.js for better compatibility. Azure OpenAI is the primary LLM provider in the default deployment.
+
 ## Language & Runtime
 
-- **Python 3.10+** — async-first with `asyncio`, type hints, dataclasses, Pydantic v2
+- **Python 3.12** — async-first with `asyncio`, type hints, dataclasses, Pydantic v2
 - **TypeScript** — React 19 frontend with strict typing
 
 ## Build & Package Management

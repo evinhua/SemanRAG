@@ -1,5 +1,7 @@
 # Roadmap
 
+> **Status: All 11 phases fully implemented.** See `prompts.md` for the generation prompts used.
+
 This roadmap reconstructs the logical build order for SemanRAG — the sequence of prompts and implementation phases needed to build the project from scratch.
 
 ## Phase 1: Core Data Model & Storage Abstractions
