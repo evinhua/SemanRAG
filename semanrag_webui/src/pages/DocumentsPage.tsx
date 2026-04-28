@@ -35,6 +35,7 @@ export default function DocumentsPage() {
   const [preview, setPreview] = useState<DocDetail | null>(null);
   const [pipeline, setPipeline] = useState<PipelineStatus | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0, fileName: "" });
 
   const loadDocs = useCallback(async () => {
     const res = await documentsApi.list({ offset: page * pageSize, limit: pageSize, status: statusFilter || undefined });
@@ -65,9 +66,13 @@ export default function DocumentsPage() {
   // Drag-and-drop upload
   const onDrop = useCallback(async (files: File[]) => {
     setUploading(true);
+    setUploadProgress({ current: 0, total: files.length, fileName: files[0]?.name ?? "" });
     try {
-      for (const file of files) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]!;
+        setUploadProgress({ current: i, total: files.length, fileName: file.name });
         await documentsApi.upload(file);
+        setUploadProgress({ current: i + 1, total: files.length, fileName: file.name });
       }
       loadDocs();
       loadPipeline();
@@ -75,6 +80,7 @@ export default function DocumentsPage() {
       console.error("Upload failed:", err);
     } finally {
       setUploading(false);
+      setUploadProgress({ current: 0, total: 0, fileName: "" });
     }
   }, [loadDocs, loadPipeline]);
 
@@ -151,7 +157,20 @@ export default function DocumentsPage() {
           <input {...getInputProps()} />
           <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
           {uploading ? (
-            <p className="text-sm text-muted-foreground">Uploading…</p>
+            <div className="w-full max-w-xs mx-auto">
+              <p className="text-sm text-muted-foreground mb-1">
+                Uploading {uploadProgress.fileName} ({uploadProgress.current}/{uploadProgress.total})
+              </p>
+              <div className="w-full bg-muted rounded-full h-2.5">
+                <div
+                  className="bg-primary h-2.5 rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${uploadProgress.total ? Math.round((uploadProgress.current / uploadProgress.total) * 100) : 0}%` }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-1 text-right">
+                {uploadProgress.total ? Math.round((uploadProgress.current / uploadProgress.total) * 100) : 0}%
+              </p>
+            </div>
           ) : (
             <p className="text-sm text-muted-foreground">
               {isDragActive ? "Drop files here" : "Drag & drop files, or click to browse"}

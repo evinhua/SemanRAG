@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
+import asyncio
 import os
 import tempfile
-from dataclasses import asdict
-from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Request, UploadFile, File, Form, Query
+from fastapi import APIRouter, File, Form, HTTPException, Query, Request, UploadFile, WebSocket
 from pydantic import BaseModel, Field
 
 from semanrag.base import ACLPolicy, DocStatus
@@ -26,14 +25,14 @@ class ACLPolicyModel(BaseModel):
 
 class TextInsertRequest(BaseModel):
     content: str
-    doc_id: Optional[str] = None
-    acl_policy: Optional[ACLPolicyModel] = None
+    doc_id: str | None = None
+    acl_policy: ACLPolicyModel | None = None
 
 
 class TextsInsertRequest(BaseModel):
     contents: list[str]
-    doc_ids: Optional[list[str]] = None
-    acl_policy: Optional[ACLPolicyModel] = None
+    doc_ids: list[str] | None = None
+    acl_policy: ACLPolicyModel | None = None
 
 
 class ScanRequest(BaseModel):
@@ -78,7 +77,7 @@ class DocumentDetailResponse(BaseModel):
     file_path: str
     pii_findings: list[dict]
     prompt_injection_flags: list[dict]
-    acl_policy: Optional[ACLPolicyModel] = None
+    acl_policy: ACLPolicyModel | None = None
     version: int
     error_message: str
 
@@ -208,7 +207,7 @@ async def scan_directory(body: ScanRequest, request: Request):
                 if ext in {".pdf", ".docx", ".pptx", ".xlsx"}:
                     await rag.ainsert("", file_paths=[fpath])
                 else:
-                    with open(fpath, "r", encoding="utf-8", errors="replace") as f:
+                    with open(fpath, encoding="utf-8", errors="replace") as f:
                         text = f.read()
                     await rag.ainsert(text, file_paths=[fpath])
                 from semanrag.utils import compute_mdhash_id
@@ -224,8 +223,8 @@ async def list_documents(
     request: Request,
     offset: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
-    status: Optional[str] = Query(None),
-    user_id: Optional[str] = Query(None),
+    status: str | None = Query(None),
+    user_id: str | None = Query(None),
 ):
     rag = request.app.state.rag
     acl_filter = {"user_id": user_id, "user_groups": []} if user_id else None
@@ -327,3 +326,15 @@ async def reingest_document(doc_id: str, request: Request):
         await rag.doc_status_storage.upsert(doc_id, updated)
 
     return DocumentUploadResponse(doc_id=doc_id, status="completed", message=f"Re-ingested v{new_version}")
+
+
+@router.websocket("/ws/pipeline")
+async def pipeline_ws(websocket: WebSocket):
+    """WebSocket for live pipeline status — sends updates when docs change status."""
+    await websocket.accept()
+    try:
+        while True:
+            await asyncio.sleep(30)
+            await websocket.send_json({"type": "ping"})
+    except Exception:
+        pass

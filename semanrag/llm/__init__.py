@@ -3,6 +3,16 @@
 All providers are lazily imported to avoid hard dependencies.
 """
 
+from semanrag.llm.anthropic_impl import anthropic_complete, anthropic_complete_if_cache, anthropic_embed
+from semanrag.llm.bedrock_impl import bedrock_complete, bedrock_complete_if_cache, bedrock_embed
+from semanrag.llm.gemini_impl import (
+    gemini_complete_if_cache,
+    gemini_embed,
+    gemini_model_complete,
+)
+from semanrag.llm.hf_impl import hf_embed, hf_model_complete
+from semanrag.llm.llama_index_impl import llama_index_complete_if_cache, llama_index_embed
+from semanrag.llm.ollama_impl import ollama_embed, ollama_model_complete
 from semanrag.llm.openai_impl import (
     azure_openai_complete_if_cache,
     azure_openai_embed,
@@ -11,18 +21,8 @@ from semanrag.llm.openai_impl import (
     openai_complete_if_cache,
     openai_embed,
 )
-from semanrag.llm.ollama_impl import ollama_embed, ollama_model_complete
-from semanrag.llm.gemini_impl import (
-    gemini_complete_if_cache,
-    gemini_embed,
-    gemini_model_complete,
-)
-from semanrag.llm.bedrock_impl import bedrock_complete, bedrock_complete_if_cache, bedrock_embed
-from semanrag.llm.anthropic_impl import anthropic_complete, anthropic_complete_if_cache, anthropic_embed
-from semanrag.llm.hf_impl import hf_embed, hf_model_complete
-from semanrag.llm.llama_index_impl import llama_index_complete_if_cache, llama_index_embed
-from semanrag.llm.zhipu_impl import zhipu_complete_if_cache, zhipu_embedding
 from semanrag.llm.vllm_impl import vllm_complete, vllm_embed
+from semanrag.llm.zhipu_impl import zhipu_complete_if_cache, zhipu_embedding
 
 __all__ = [
     # OpenAI

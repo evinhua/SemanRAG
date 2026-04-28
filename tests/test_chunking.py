@@ -1,7 +1,7 @@
 """Tests for chunking strategies in semanrag.operate."""
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 import numpy as np
 import pytest

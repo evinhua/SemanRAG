@@ -7,9 +7,10 @@ import logging
 import threading
 import time
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +31,7 @@ class UnifiedLock:
         return self._async_lock.locked() or self._thread_lock.locked()
 
     # Async context manager
-    async def __aenter__(self) -> "UnifiedLock":
+    async def __aenter__(self) -> UnifiedLock:
         await self._async_lock.acquire()
         return self
 
@@ -38,7 +39,7 @@ class UnifiedLock:
         self._async_lock.release()
 
     # Sync context manager
-    def __enter__(self) -> "UnifiedLock":
+    def __enter__(self) -> UnifiedLock:
         self._thread_lock.acquire()
         return self
 

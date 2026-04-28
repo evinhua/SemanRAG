@@ -11,7 +11,6 @@ from semanrag.kg.shared_storage import (
     KeyedUnifiedLock,
     MutableBoolean,
     NamespaceLock,
-    PipelineStatus,
     UnifiedLock,
     initialize_pipeline_status,
     update_pipeline_status,

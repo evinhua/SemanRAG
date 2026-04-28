@@ -6,6 +6,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+qdrant_client = pytest.importorskip("qdrant_client")
+
 
 @pytest.fixture()
 def mock_qdrant_client():
@@ -49,7 +51,7 @@ async def test_collection_creation(mock_qdrant_client):
 
 def test_batch_size_estimation():
     """Verify batch size estimation constants."""
-    from semanrag.kg.qdrant_impl import _POINT_OVERHEAD, _MAX_BATCH_BYTES
+    from semanrag.kg.qdrant_impl import _MAX_BATCH_BYTES, _POINT_OVERHEAD
 
     dim = 128
     vector_bytes = dim * 4  # float32

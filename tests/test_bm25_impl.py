@@ -3,13 +3,11 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import os
 
 import pytest
 
-from semanrag.kg.inmemory_bm25_impl import InMemoryBM25Storage, BM25_AVAILABLE
-
+from semanrag.kg.inmemory_bm25_impl import BM25_AVAILABLE, InMemoryBM25Storage
 
 pytestmark = pytest.mark.skipif(not BM25_AVAILABLE, reason="rank_bm25 not installed")
 

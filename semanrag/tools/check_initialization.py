@@ -20,7 +20,6 @@ async def _check() -> list[tuple[str, bool, str]]:
     # 2. Check LLM config
     model = os.environ.get("LLM_MODEL", "")
     binding = os.environ.get("LLM_BINDING", "")
-    api_key = os.environ.get("LLM_API_KEY", "")
     has_llm = bool(model and binding)
     results.append(("LLM config", has_llm, f"{binding}/{model}" if has_llm else "LLM_MODEL or LLM_BINDING not set"))
 

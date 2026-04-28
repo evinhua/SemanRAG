@@ -9,7 +9,6 @@ import pytest
 
 from semanrag.kg.milvus_impl import MilvusIndexConfig
 
-
 VALID_INDEX_TYPES = ["AUTOINDEX", "HNSW", "HNSW_SQ", "IVF_FLAT", "DISKANN", "SCANN"]
 
 

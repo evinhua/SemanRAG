@@ -2,13 +2,10 @@ from __future__ import annotations
 
 import os
 import shutil
-import tempfile
-from typing import Callable
-from unittest.mock import AsyncMock
+from collections.abc import Callable
 
 import numpy as np
 import pytest
-
 
 # ---------------------------------------------------------------------------
 # Command-line options

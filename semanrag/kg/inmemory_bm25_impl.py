@@ -110,7 +110,7 @@ class InMemoryBM25Storage(BaseLexicalStorage):
         path = self._snapshot_path
         if os.path.exists(path):
             try:
-                with open(path, "r", encoding="utf-8") as f:
+                with open(path, encoding="utf-8") as f:
                     self._documents = json.load(f)
                 self._rebuild_index()
                 logger.info("Loaded BM25 snapshot from %s (%d docs)", path, len(self._documents))

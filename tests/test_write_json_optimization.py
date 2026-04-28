@@ -10,7 +10,7 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
-from semanrag.utils import SanitizingJSONEncoder, write_json
+from semanrag.utils import write_json
 
 
 @pytest.fixture()

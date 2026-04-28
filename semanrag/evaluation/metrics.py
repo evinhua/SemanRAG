@@ -13,9 +13,9 @@ def ragas_context_precision(
     query: str, answer: str, contexts: list[str], ground_truth: str
 ) -> float:
     try:
+        from datasets import Dataset
         from ragas import evaluate as ragas_evaluate
         from ragas.metrics import context_precision as cp
-        from datasets import Dataset
 
         ds = Dataset.from_dict(
             {
@@ -43,9 +43,9 @@ def ragas_context_precision(
 
 def ragas_faithfulness(query: str, answer: str, contexts: list[str]) -> float:
     try:
+        from datasets import Dataset
         from ragas import evaluate as ragas_evaluate
         from ragas.metrics import faithfulness as fm
-        from datasets import Dataset
 
         ds = Dataset.from_dict(
             {
@@ -72,9 +72,9 @@ def ragas_faithfulness(query: str, answer: str, contexts: list[str]) -> float:
 
 def ragas_answer_relevancy(query: str, answer: str) -> float:
     try:
+        from datasets import Dataset
         from ragas import evaluate as ragas_evaluate
         from ragas.metrics import answer_relevancy as ar
-        from datasets import Dataset
 
         ds = Dataset.from_dict(
             {
@@ -103,9 +103,9 @@ def ragas_context_recall(
     ground_truth_contexts: list[str],
 ) -> float:
     try:
+        from datasets import Dataset
         from ragas import evaluate as ragas_evaluate
         from ragas.metrics import context_recall as cr
-        from datasets import Dataset
 
         ds = Dataset.from_dict(
             {

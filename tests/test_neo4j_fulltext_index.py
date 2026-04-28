@@ -6,6 +6,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+neo4j = pytest.importorskip("neo4j")
+
 
 @pytest.fixture()
 def mock_neo4j_driver():

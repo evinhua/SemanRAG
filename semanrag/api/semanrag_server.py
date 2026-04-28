@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import os
-import sys
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from functools import partial
 from pathlib import Path
-from typing import Any, AsyncIterator
+from typing import Any
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -48,10 +48,13 @@ def _build_llm_model_func(cfg: LLMConfig) -> Any:
     api_key = cfg.api_key or None
     base_url = cfg.base_url or None
 
-    if provider in ("openai", "azure_openai"):
-        from semanrag.llm.openai_impl import openai_complete_if_cache
+    if provider in ("openai", "azure_openai", "azure-openai"):
+        from semanrag.llm.openai_impl import azure_openai_complete_if_cache, openai_complete_if_cache
 
-        return partial(openai_complete_if_cache, model=model, api_key=api_key, base_url=base_url)
+        if provider in ("azure_openai", "azure-openai"):
+            api_version = os.environ.get("LLM_API_VERSION", "2024-02-15-preview")
+            return partial(azure_openai_complete_if_cache, model, api_key=api_key, base_url=base_url, api_version=api_version)
+        return partial(openai_complete_if_cache, model, api_key=api_key, base_url=base_url)
 
     if provider == "ollama":
         from semanrag.llm.ollama_impl import ollama_model_complete
@@ -103,9 +106,16 @@ def _build_embedding_func(cfg: LLMConfig) -> EmbeddingFunc:
     api_key = cfg.api_key or None
     base_url = cfg.base_url or None
 
-    if provider in ("openai", "azure_openai"):
-        from semanrag.llm.openai_impl import openai_embed
+    if provider in ("openai", "azure_openai", "azure-openai"):
+        from semanrag.llm.openai_impl import azure_openai_embed, openai_embed
 
+        if provider in ("azure_openai", "azure-openai"):
+            api_version = os.environ.get("EMBEDDING_API_VERSION", os.environ.get("LLM_API_VERSION", "2024-02-15-preview"))
+            return EmbeddingFunc(
+                embedding_dim=cfg.embedding_dim,
+                max_token_size=cfg.max_token_size,
+                func=partial(azure_openai_embed, model=model, api_key=api_key, base_url=base_url, api_version=api_version),
+            )
         return EmbeddingFunc(
             embedding_dim=cfg.embedding_dim,
             max_token_size=cfg.max_token_size,
@@ -309,12 +319,34 @@ def create_app() -> FastAPI:
         setup_prometheus(app)
 
     # ── Routers ───────────────────────────────────────────────────
+    @app.get("/api/health")
+    async def health():
+        return {"status": "ok", "auth_required": auth_cfg.enabled}
+
     _include_routers(app)
 
     # ── Static files (WebUI) ──────────────────────────────────────
     static_dir = server_cfg.static_dir or os.environ.get("SEMANRAG_STATIC_DIR", "")
     if static_dir and Path(static_dir).is_dir():
-        app.mount("/", StaticFiles(directory=static_dir, html=True), name="webui")
+        from fastapi.responses import FileResponse, HTMLResponse
+
+        app.mount("/assets", StaticFiles(directory=str(Path(static_dir) / "assets")), name="assets")
+
+        # SPA fallback — serve index.html for frontend routes only
+        _API_PREFIXES = ("query", "documents", "graph", "admin", "feedback", "api", "ws", "health")
+
+        @app.get("/{full_path:path}", include_in_schema=False)
+        async def spa_fallback(request: Request, full_path: str):
+            # Don't intercept API routes
+            first_segment = full_path.split("/")[0] if full_path else ""
+            if first_segment in _API_PREFIXES:
+                return JSONResponse(status_code=404, content={"detail": "Not found"})
+            # Serve static file if it exists
+            file_path = Path(static_dir) / full_path
+            if full_path and file_path.is_file():
+                return FileResponse(file_path)
+            # Otherwise serve index.html for SPA routing
+            return FileResponse(Path(static_dir) / "index.html")
 
     # ── Global exception handler ──────────────────────────────────
     @app.exception_handler(Exception)
@@ -335,7 +367,7 @@ def _include_routers(app: FastAPI) -> None:
 
     import semanrag.api.routers as routers_pkg
 
-    for importer, modname, ispkg in pkgutil.iter_modules(routers_pkg.__path__):
+    for _importer, modname, _ispkg in pkgutil.iter_modules(routers_pkg.__path__):
         try:
             mod = importlib.import_module(f"semanrag.api.routers.{modname}")
             if hasattr(mod, "router"):

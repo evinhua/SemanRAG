@@ -2,11 +2,12 @@
 from __future__ import annotations
 
 import os
-import time
 from datetime import timedelta
 from unittest.mock import patch
 
 import pytest
+
+pytest.importorskip("fastapi")
 
 from semanrag.api.auth import AuthHandler
 from semanrag.api.config import AuthConfig

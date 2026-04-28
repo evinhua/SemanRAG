@@ -1,10 +1,10 @@
 """Micro-benchmark for chunking_by_token_size with varying input sizes."""
 
 import time
+
 import pytest
 
 from semanrag.operate import chunking_by_token_size
-
 
 SIZES = [10_000, 100_000, 1_000_000]
 

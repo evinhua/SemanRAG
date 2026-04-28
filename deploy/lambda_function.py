@@ -10,7 +10,6 @@ from __future__ import annotations
 import asyncio
 import json
 import os
-import tempfile
 from typing import Any
 
 import boto3
@@ -79,7 +78,6 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     _sync_from_s3()
 
     # Parse request
-    http_method = event.get("httpMethod", event.get("requestContext", {}).get("http", {}).get("method", "POST"))
     body_str = event.get("body", "{}")
     body = json.loads(body_str) if isinstance(body_str, str) else body_str
     path = event.get("path", event.get("rawPath", "/query"))

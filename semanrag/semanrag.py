@@ -19,7 +19,6 @@ from semanrag.base import (
     DocStatusStorage,
     QueryParam,
     QueryResult,
-    TextChunkSchema,
 )
 from semanrag.operate import (
     _merge_edges_then_upsert,
@@ -39,14 +38,12 @@ from semanrag.operate import (
     pii_scan,
     prompt_injection_scan,
     resolve_entities,
-    rewrite_query,
 )
 from semanrag.utils import (
     EmbeddingFunc,
     TiktokenTokenizer,
     TokenBudget,
     compute_mdhash_id,
-    load_json,
     logger,
     write_json,
 )
@@ -320,7 +317,7 @@ class SemanRAG:
         if file_paths is None:
             file_paths = [""] * len(content)
 
-        for idx, (doc_text, doc_id, fpath) in enumerate(zip(content, ids, file_paths)):
+        for _idx, (doc_text, doc_id, fpath) in enumerate(zip(content, ids, file_paths)):
             doc_status = DocStatus(
                 id=doc_id,
                 content=doc_text[:500],
@@ -442,6 +439,13 @@ class SemanRAG:
                     }
                     chunks_bm25_data[cid] = {"content": c["content"], "full_doc_id": doc_id}
 
+                # Embed chunks before VDB upsert
+                if chunks_vdb_data and self.embedding_func:
+                    texts = [chunks_vdb_data[cid]["content"] for cid in chunks_vdb_data]
+                    embeddings = await self.embedding_func(texts)
+                    for i, cid in enumerate(chunks_vdb_data):
+                        chunks_vdb_data[cid]["__vector__"] = embeddings[i].tolist() if hasattr(embeddings[i], "tolist") else list(embeddings[i])
+
                 await self._chunks_vdb.upsert(chunks_vdb_data)
                 await self._chunks_bm25.upsert(chunks_bm25_data)
 
@@ -454,11 +458,16 @@ class SemanRAG:
 
                 # --- g. Build communities ---
                 if self.enable_community_detection:
-                    await build_communities(
-                        self.graph_storage,
-                        self._global_config,
-                        llm_response_cache=self._llm_response_cache,
-                    )
+                    all_labels = await self.graph_storage.get_all_labels()
+                    if len(all_labels) >= 5:  # Need enough nodes for meaningful communities
+                        try:
+                            await build_communities(
+                                self.graph_storage,
+                                self._global_config,
+                                llm_response_cache=self._llm_response_cache,
+                            )
+                        except Exception as e:
+                            logger.warning(f"Community detection skipped: {e}")
 
                 # --- h. Update doc status ---
                 doc_status.status = "completed"
@@ -495,7 +504,8 @@ class SemanRAG:
         if param.mode == "bypass":
             if param.stream:
                 async def _stream():
-                    async for chunk in self.llm_model_func(query, stream=True):
+                    stream_iter = await self.llm_model_func(query, stream=True)
+                    async for chunk in stream_iter:
                         yield chunk
                 return QueryResult(
                     response_iterator=_stream(),
@@ -887,8 +897,8 @@ class SemanRAG:
             if node is None:
                 continue
             if community_level is not None:
-                node_community = node.get("community", "")
                 # Filter by community level if metadata available
+                pass
             nodes.append({"id": label, **node})
             node_edges = await self.graph_storage.get_node_edges(label)
             for src, tgt in node_edges:

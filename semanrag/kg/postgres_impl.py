@@ -6,7 +6,7 @@ import asyncio
 import json
 import logging
 from dataclasses import asdict
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import Any
 
 import asyncpg
@@ -24,7 +24,7 @@ from semanrag.base import (
 logger = logging.getLogger(__name__)
 
 
-def _get_pg_db(global_config: dict) -> "PostgreSQLDB":
+def _get_pg_db(global_config: dict) -> PostgreSQLDB:
     """Get or create a PostgreSQLDB instance from global_config."""
     if "pg_db" in global_config:
         return global_config["pg_db"]
@@ -40,7 +40,7 @@ class PostgreSQLDB:
         self._database = config.get("pg_database", "semanrag")
         self._user = config.get("pg_user", "postgres")
         self._password = config.get("pg_password", "")
-        self._ssl = config.get("pg_ssl", None)
+        self._ssl = config.get("pg_ssl")
         self._min_size = config.get("pg_min_size", 2)
         self._max_size = config.get("pg_max_size", 10)
         self._statement_timeout = config.get("pg_statement_timeout", 30000)
@@ -94,7 +94,7 @@ class PostgreSQLDB:
             )
             return await conn.fetchrow(query, *args)
 
-    async def __aenter__(self) -> "PostgreSQLDB":
+    async def __aenter__(self) -> PostgreSQLDB:
         await self.connect()
         return self
 

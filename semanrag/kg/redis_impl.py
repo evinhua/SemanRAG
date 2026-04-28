@@ -30,7 +30,7 @@ def _get_redis_config(global_config: dict) -> dict:
     }
 
 
-def _make_client(cfg: dict) -> "aioredis.Redis":
+def _make_client(cfg: dict) -> aioredis.Redis:
     return aioredis.Redis(
         host=cfg["host"],
         port=cfg["port"],

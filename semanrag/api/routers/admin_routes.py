@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime
-from typing import Optional
 
 from fastapi import APIRouter, Query, Request
 from pydantic import BaseModel, Field
@@ -35,7 +34,7 @@ class BudgetRequest(BaseModel):
 
 
 class EvalRunRequest(BaseModel):
-    dataset: Optional[str] = None
+    dataset: str | None = None
     metrics: list[str] = Field(default_factory=lambda: ["relevance", "faithfulness"])
 
 

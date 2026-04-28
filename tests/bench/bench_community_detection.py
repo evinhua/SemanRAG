@@ -1,9 +1,9 @@
 """Benchmark Leiden community detection on random graphs of varying sizes."""
 
 import time
-import pytest
-import networkx as nx
 
+import networkx as nx
+import pytest
 
 EDGE_COUNTS = [1_000, 10_000, 100_000]
 

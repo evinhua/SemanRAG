@@ -6,9 +6,8 @@ import asyncio
 import json
 import time
 from datetime import datetime
-from typing import Any, Optional
 
-from fastapi import APIRouter, HTTPException, Request, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
@@ -25,8 +24,8 @@ class QueryRequest(BaseModel):
     top_k: int = 20
     stream: bool = False
     conversation_history: list[dict] = Field(default_factory=list)
-    snapshot_at: Optional[str] = None
-    user_id: Optional[str] = None
+    snapshot_at: str | None = None
+    user_id: str | None = None
     user_groups: list[str] = Field(default_factory=list)
     response_type: str = "Multiple Paragraphs"
     enable_rerank: bool = True
@@ -69,7 +68,7 @@ class QueryCompareRequest(BaseModel):
     query: str
     variant_a: QueryParamVariant
     variant_b: QueryParamVariant
-    user_id: Optional[str] = None
+    user_id: str | None = None
     user_groups: list[str] = Field(default_factory=list)
 
 

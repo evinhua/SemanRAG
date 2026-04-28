@@ -1,14 +1,12 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import AsyncIterator, Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import (
     Any,
-    AsyncIterator,
-    Callable,
     Literal,
-    Optional,
     TypedDict,
 )
 
@@ -23,8 +21,8 @@ class TextChunkSchema(TypedDict):
     content: str
     full_doc_id: str
     chunk_order_index: int
-    section_path: Optional[str]
-    page_number: Optional[int]
+    section_path: str | None
+    page_number: int | None
     modality: Literal["text", "table", "figure_caption"]
 
 
@@ -34,8 +32,8 @@ class TextChunkSchema(TypedDict):
 @dataclass
 class TemporalEdge:
     source: str
-    valid_from: Optional[datetime] = None
-    valid_to: Optional[datetime] = None
+    valid_from: datetime | None = None
+    valid_to: datetime | None = None
     confidence: float = 1.0
 
 
@@ -349,13 +347,13 @@ class QueryParam:
     max_relation_tokens: int = 4000
     max_total_tokens: int = 12000
     conversation_history: list[dict] = field(default_factory=list)
-    model_func: Optional[Callable] = None
+    model_func: Callable | None = None
     user_prompt: str = ""
     enable_rerank: bool = True
     enable_hybrid_lexical: bool = True
     rrf_k: int = 60
-    snapshot_at: Optional[datetime] = None
-    user_id: Optional[str] = None
+    snapshot_at: datetime | None = None
+    user_id: str | None = None
     user_groups: list[str] = field(default_factory=list)
     verifier_enabled: bool = True
 
@@ -373,7 +371,7 @@ class QueryParam:
 class QueryResult:
     content: str = ""
     raw_data: dict = field(default_factory=dict)
-    response_iterator: Optional[AsyncIterator] = None
+    response_iterator: AsyncIterator | None = None
     is_streaming: bool = False
     references: list[dict] = field(default_factory=list)
     grounded_check: list[dict] = field(default_factory=list)
@@ -398,8 +396,8 @@ class ExtractedRelation(BaseModel):
     keywords: str = ""
     description: str = ""
     confidence: float = Field(default=0.5, ge=0.0, le=1.0)
-    valid_from: Optional[str] = None
-    valid_to: Optional[str] = None
+    valid_from: str | None = None
+    valid_to: str | None = None
 
 
 class ExtractionResult(BaseModel):

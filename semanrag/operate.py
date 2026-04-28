@@ -21,11 +21,9 @@ from semanrag.base import (
     BaseKVStorage,
     BaseLexicalStorage,
     BaseVectorStorage,
-    DocStatus,
-    DocStatusStorage,
-    ExtractionResult,
     ExtractedEntity,
     ExtractedRelation,
+    ExtractionResult,
     QueryParam,
     QueryResult,
     TextChunkSchema,
@@ -37,19 +35,16 @@ from semanrag.prompt import (
     PROMPTS,
 )
 from semanrag.utils import (
-    EmbeddingFunc,
     TiktokenTokenizer,
     compute_mdhash_id,
     detect_pii,
     detect_prompt_injection,
     logger,
-    otel_span,
     reciprocal_rank_fusion,
     sanitize_output,
     truncate_list_by_token_size,
     use_llm_func_with_cache,
 )
-
 
 # ═══════════════════════════════════════════════════════════════════════════
 # CHUNKING
@@ -993,12 +988,12 @@ async def _merge_nodes_then_upsert(
 
         try:
             embeddings = await embedding_func([f"{name}: {node_data['description']}"])
-            embed_vec = embeddings[0] if len(embeddings) > 0 else None
+            embed_vec = embeddings[0].tolist() if hasattr(embeddings[0], "tolist") else list(embeddings[0])
             await entities_vdb.upsert({
                 compute_mdhash_id(name): {
                     "entity_name": name,
                     "content": f"{name}: {node_data['description']}",
-                    "embedding": embed_vec,
+                    "__vector__": embed_vec,
                 }
             })
         except Exception as e:
@@ -1071,14 +1066,14 @@ async def _merge_edges_then_upsert(
         try:
             content = f"{src} -> {tgt}: {edge_data['description']}"
             embeddings = await embedding_func([content])
-            embed_vec = embeddings[0] if len(embeddings) > 0 else None
+            embed_vec = embeddings[0].tolist() if hasattr(embeddings[0], "tolist") else list(embeddings[0])
             edge_id = compute_mdhash_id(f"{src}-{tgt}")
             await relationships_vdb.upsert({
                 edge_id: {
                     "src_id": src,
                     "tgt_id": tgt,
                     "content": content,
-                    "embedding": embed_vec,
+                    "__vector__": embed_vec,
                 }
             })
         except Exception as e:
@@ -1631,7 +1626,8 @@ async def kg_query(
 
     if param.stream:
         async def _stream():
-            async for chunk in llm_func(prompt, stream=True):
+            stream_iter = await llm_func(prompt, stream=True)
+            async for chunk in stream_iter:
                 yield chunk
         return QueryResult(
             response_iterator=_stream(), is_streaming=True,
@@ -1763,7 +1759,8 @@ async def naive_query(
 
     if param.stream:
         async def _stream():
-            async for chunk in llm_func(prompt, stream=True):
+            stream_iter = await llm_func(prompt, stream=True)
+            async for chunk in stream_iter:
                 yield chunk
         return QueryResult(
             response_iterator=_stream(), is_streaming=True,
@@ -1800,9 +1797,14 @@ async def community_query(
 
     keywords = await get_keywords_from_query(query, global_config, llm_response_cache)
     all_kw = keywords.get("high_level_keywords", []) + keywords.get("low_level_keywords", [])
-    kw_text = " ".join(all_kw) if all_kw else query
 
     # Get community hierarchy
+    all_labels = await knowledge_graph.get_all_labels()
+    if not all_labels:
+        # No data in graph — return empty response
+        content = PROMPTS["fail_response"]
+        return QueryResult(content=content, latency_ms=(_time.monotonic() - t0) * 1000)
+
     community_hierarchy = await knowledge_graph.detect_communities(
         "leiden", levels=global_config.get("community_levels", 3)
     )

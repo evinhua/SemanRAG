@@ -33,7 +33,7 @@ class JsonKVStorage(BaseKVStorage):
         if self._data is not None:
             return self._data
         try:
-            with open(self._file_path, "r", encoding="utf-8") as f:
+            with open(self._file_path, encoding="utf-8") as f:
                 self._data = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             self._data = {}
@@ -81,7 +81,7 @@ class JsonKVStorage(BaseKVStorage):
             legacy_path = os.path.join(self._working_dir, f"{self._namespace}.json")
             if os.path.exists(legacy_path) and not os.path.exists(self._file_path):
                 try:
-                    with open(legacy_path, "r", encoding="utf-8") as f:
+                    with open(legacy_path, encoding="utf-8") as f:
                         legacy_data = json.load(f)
                     self._data = legacy_data
                     self._save()

@@ -31,7 +31,7 @@ def _load_config() -> None:
             break
 
 
-def _make_rag(workspace: str | None = None) -> "SemanRAG":
+def _make_rag(workspace: str | None = None):
     from semanrag.semanrag import SemanRAG
 
     working_dir = os.environ.get("WORKING_DIR", "./data")
@@ -39,7 +39,7 @@ def _make_rag(workspace: str | None = None) -> "SemanRAG":
     return rag
 
 
-async def _init_rag(workspace: str | None = None) -> "SemanRAG":
+async def _init_rag(workspace: str | None = None):
     rag = _make_rag(workspace)
     await rag.initialize_storages()
     return rag
@@ -55,7 +55,7 @@ async def _cmd_query(args: argparse.Namespace) -> int:
     try:
         param = QueryParam(mode=args.mode)
         if args.snapshot_at:
-            from datetime import datetime, timezone
+            from datetime import datetime
 
             param.snapshot_at = datetime.fromisoformat(args.snapshot_at)
         if args.user:

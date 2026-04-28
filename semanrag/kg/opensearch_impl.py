@@ -9,7 +9,15 @@ from dataclasses import asdict
 from datetime import datetime
 from typing import Any
 
-from semanrag.base import ACLPolicy, BaseGraphStorage, BaseKVStorage, BaseLexicalStorage, BaseVectorStorage, DocStatus, DocStatusStorage
+from semanrag.base import (
+    ACLPolicy,
+    BaseGraphStorage,
+    BaseKVStorage,
+    BaseLexicalStorage,
+    BaseVectorStorage,
+    DocStatus,
+    DocStatusStorage,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -174,11 +182,7 @@ class OSVectorStorage(BaseVectorStorage):
             user_groups = acl_filter.get("user_groups", [])
             filtered = []
             for r in results:
-                if r.get("acl_public", True):
-                    filtered.append(r)
-                elif user_id and (r.get("acl_owner") == user_id or user_id in r.get("acl_visible_to_users", [])):
-                    filtered.append(r)
-                elif user_groups and set(user_groups) & set(r.get("acl_visible_to_groups", [])):
+                if r.get("acl_public", True) or user_id and (r.get("acl_owner") == user_id or user_id in r.get("acl_visible_to_users", [])) or user_groups and set(user_groups) & set(r.get("acl_visible_to_groups", [])):
                     filtered.append(r)
             results = filtered
         return results

@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 COPY pyproject.toml README.md ./
-COPY src/ src/
+COPY semanrag/ semanrag/
 
 RUN pip install --no-cache-dir "." && rm -rf /root/.cache
 

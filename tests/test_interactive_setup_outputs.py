@@ -2,11 +2,6 @@
 
 from __future__ import annotations
 
-import os
-from io import StringIO
-from pathlib import Path
-from unittest.mock import patch
-
 import pytest
 
 
@@ -26,18 +21,6 @@ async def test_env_file_generated(tmp_working_dir):
         "VECTOR_DB=faiss\n"
         "GRAPH_DB=networkx\n"
     )
-
-    # Simulate interactive input that would generate this .env
-    user_inputs = [
-        "./data",           # working dir
-        "gpt-4o",          # LLM model
-        "openai",          # LLM binding
-        "sk-test-key",     # API key
-        "text-embedding-3-small",  # embedding model
-        "1536",            # embedding dim
-        "faiss",           # vector db
-        "networkx",        # graph db
-    ]
 
     # Write the .env file as the setup would
     env_path.write_text(env_content)

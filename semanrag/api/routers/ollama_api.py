@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import time
-from typing import Optional
 
 from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
@@ -26,14 +25,14 @@ class OllamaChatRequest(BaseModel):
     model: str = "semanrag"
     messages: list[OllamaMessage] = Field(default_factory=list)
     stream: bool = True
-    options: Optional[dict] = None
+    options: dict | None = None
 
 
 class OllamaGenerateRequest(BaseModel):
     model: str = "semanrag"
     prompt: str = ""
     stream: bool = True
-    options: Optional[dict] = None
+    options: dict | None = None
 
 
 # ── Helpers ──────────────────────────────────────────────────────────

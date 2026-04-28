@@ -12,11 +12,12 @@ import re
 import sys
 import tempfile
 import time
+from collections.abc import Callable
 from contextvars import ContextVar
-from dataclasses import asdict, dataclass, field, fields, is_dataclass
+from dataclasses import asdict, dataclass, field, is_dataclass
 from datetime import UTC, datetime
 from functools import wraps
-from typing import Any, Callable, Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 try:
     import numpy as np
@@ -414,7 +415,7 @@ def write_json(data: Any, path: str) -> None:
 # ═══════════════════════════════════════════════════════════════════════════
 def load_json(path: str) -> dict | list:
     try:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             return json.load(f)
     except Exception:
         return {}
@@ -454,9 +455,10 @@ def reciprocal_rank_fusion(
     items: dict[str, dict] = {}
     for result_list in result_lists:
         for rank, item in enumerate(result_list):
-            item_id = item["id"]
+            item_id = item.get("id") or item.get("__id__") or item.get("entity_name") or str(rank)
             scores[item_id] = scores.get(item_id, 0.0) + 1.0 / (k + rank + 1)
-            items[item_id] = item
+            if item_id not in items:
+                items[item_id] = {**item, "id": item_id}
     sorted_ids = sorted(scores, key=lambda x: scores[x], reverse=True)
     return [{**items[i], "rrf_score": scores[i]} for i in sorted_ids]
 

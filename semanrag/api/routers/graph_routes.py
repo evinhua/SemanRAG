@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Optional
 
 from fastapi import APIRouter, HTTPException, Query, Request
 from pydantic import BaseModel, Field
@@ -22,9 +21,9 @@ class EntityCreateRequest(BaseModel):
 
 
 class EntityUpdateRequest(BaseModel):
-    type: Optional[str] = None
-    description: Optional[str] = None
-    confidence: Optional[float] = Field(default=None, ge=0.0, le=1.0)
+    type: str | None = None
+    description: str | None = None
+    confidence: float | None = Field(default=None, ge=0.0, le=1.0)
 
 
 class RelationCreateRequest(BaseModel):
@@ -33,15 +32,15 @@ class RelationCreateRequest(BaseModel):
     keywords: str = ""
     description: str = ""
     confidence: float = Field(default=0.5, ge=0.0, le=1.0)
-    valid_from: Optional[str] = None
-    valid_to: Optional[str] = None
+    valid_from: str | None = None
+    valid_to: str | None = None
 
 
 class MergeRequest(BaseModel):
     source_entities: list[str]
     target_entity: str
     merge_strategy: str = "concatenate"
-    target_entity_data: Optional[dict] = None
+    target_entity_data: dict | None = None
 
 
 class GraphResponse(BaseModel):
@@ -51,7 +50,7 @@ class GraphResponse(BaseModel):
 
 class CommunityResponse(BaseModel):
     community_id: str
-    summary: Optional[str] = None
+    summary: str | None = None
     members: list[str] = Field(default_factory=list)
 
 
@@ -60,8 +59,8 @@ class CommunityResponse(BaseModel):
 @router.get("", response_model=GraphResponse)
 async def get_graph(
     request: Request,
-    snapshot_at: Optional[str] = Query(None),
-    community_level: Optional[int] = Query(None),
+    snapshot_at: str | None = Query(None),
+    community_level: int | None = Query(None),
 ):
     rag = request.app.state.rag
     snap = datetime.fromisoformat(snapshot_at) if snapshot_at else None

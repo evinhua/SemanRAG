@@ -3,8 +3,6 @@ from __future__ import annotations
 
 import pytest
 
-from semanrag.base import ExtractedEntity, ExtractedRelation
-
 
 def validate_entity_create(name: str, description: str, entity_type: str = "UNKNOWN") -> list[str]:
     """Validate entity creation request."""

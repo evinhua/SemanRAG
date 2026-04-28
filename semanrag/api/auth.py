@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import os
 from datetime import UTC, datetime, timedelta
-from typing import Any
 
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -57,11 +56,11 @@ class AuthHandler:
                 token, self.config.secret_key, algorithms=[self.config.algorithm]
             )
         except pyjwt.ExpiredSignatureError:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired")
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired") from None
         except pyjwt.InvalidTokenError as exc:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Invalid token: {exc}"
-            )
+            ) from exc
 
     # ── API key ───────────────────────────────────────────────────────
 
@@ -109,7 +108,7 @@ class AuthHandler:
         except pyjwt.InvalidTokenError as exc:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Invalid OIDC token: {exc}"
-            )
+            ) from exc
 
     # ── FastAPI dependency ────────────────────────────────────────────
 

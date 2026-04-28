@@ -2,10 +2,10 @@
 
 import time
 import uuid
+
 import pytest
 
 from semanrag.utils import reciprocal_rank_fusion
-
 
 LIST_SIZES = [10, 100, 1000]
 

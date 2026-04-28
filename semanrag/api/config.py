@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 
 
 def _env(key: str, default: str = "") -> str:
-    return os.environ.get(f"SEMANRAG_{key}", default)
+    return os.environ.get(f"SEMANRAG_{key}", os.environ.get(key, default))
 
 
 def _env_bool(key: str, default: bool = False) -> bool:
@@ -86,12 +86,12 @@ def get_config() -> dict:
         static_dir=_env("STATIC_DIR", ""),
     )
     llm = LLMConfig(
-        provider=_env("LLM_PROVIDER", "openai"),
+        provider=_env("LLM_BINDING", _env("LLM_PROVIDER", "openai")),
         model=_env("LLM_MODEL", "gpt-4o"),
         api_key=_env("LLM_API_KEY", ""),
-        base_url=_env("LLM_BASE_URL", ""),
+        base_url=_env("LLM_API_BASE", _env("LLM_BASE_URL", "")),
         embedding_model=_env("EMBEDDING_MODEL", "text-embedding-3-small"),
-        embedding_dim=_env_int("EMBEDDING_DIM", 1536),
+        embedding_dim=_env_int("EMBEDDING_DIMENSION", _env_int("EMBEDDING_DIM", 1536)),
         max_token_size=_env_int("MAX_TOKEN_SIZE", 8192),
     )
     storage = StorageConfig(

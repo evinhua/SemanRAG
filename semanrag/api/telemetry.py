@@ -13,7 +13,7 @@ from semanrag.api.config import ObservabilityConfig
 # ── Prometheus metrics (always importable; no-op if prometheus_client missing) ──
 
 try:
-    from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
+    from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
     _HAS_PROM = True
 except ImportError:
     _HAS_PROM = False
@@ -61,10 +61,10 @@ def setup_otel(app: FastAPI, config: ObservabilityConfig) -> None:
         return
     try:
         from opentelemetry import trace
-        from opentelemetry.sdk.trace import TracerProvider
-        from opentelemetry.sdk.trace.export import BatchSpanProcessor
         from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
         from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+        from opentelemetry.sdk.trace import TracerProvider
+        from opentelemetry.sdk.trace.export import BatchSpanProcessor
     except ImportError:
         import logging
         logging.getLogger("semanrag.api.telemetry").warning(

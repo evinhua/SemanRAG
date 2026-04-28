@@ -8,6 +8,7 @@ services:
     env_file: .env
     volumes:
       - semanrag-data:/app/data
+      - ./semanrag_webui/dist:/app/static
     depends_on:
       postgres:
         condition: service_healthy

@@ -1,12 +1,9 @@
 """Tests for entity extraction logic."""
 from __future__ import annotations
 
-import json
-from unittest.mock import AsyncMock, patch
-
 import pytest
 
-from semanrag.base import ExtractionResult, ExtractedEntity, ExtractedRelation
+from semanrag.base import ExtractedEntity, ExtractedRelation, ExtractionResult
 
 
 @pytest.mark.unit
@@ -33,7 +30,7 @@ class TestStructuredOutputExtraction:
     @pytest.mark.asyncio
     async def test_delimiter_fallback_extraction(self):
         """Mock LLM returning delimiter-separated format."""
-        from semanrag.prompt import DEFAULT_RECORD_DELIMITER, DEFAULT_TUPLE_DELIMITER, DEFAULT_COMPLETION_DELIMITER
+        from semanrag.prompt import DEFAULT_COMPLETION_DELIMITER, DEFAULT_RECORD_DELIMITER, DEFAULT_TUPLE_DELIMITER
 
         # Simulate delimiter-based output
         records = [

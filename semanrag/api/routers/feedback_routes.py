@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime
-from typing import Literal, Optional
+from typing import Literal
 
 from fastapi import APIRouter, Query, Request
 from pydantic import BaseModel, Field
@@ -26,16 +26,16 @@ class RatingModel(BaseModel):
 class FeedbackRequest(BaseModel):
     query_id: str
     thumbs: Literal["up", "down"]
-    rating: Optional[RatingModel] = None
-    comment: Optional[str] = None
+    rating: RatingModel | None = None
+    comment: str | None = None
 
 
 class FeedbackResponse(BaseModel):
     feedback_id: str
     query_id: str
     thumbs: str
-    rating: Optional[RatingModel] = None
-    comment: Optional[str] = None
+    rating: RatingModel | None = None
+    comment: str | None = None
     created_at: str
 
 

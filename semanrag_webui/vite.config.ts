@@ -13,6 +13,26 @@ export default defineConfig({
         target: "http://localhost:9621",
         changeOrigin: true,
       },
+      "/query": {
+        target: "http://localhost:9621",
+        changeOrigin: true,
+      },
+      "/documents": {
+        target: "http://localhost:9621",
+        changeOrigin: true,
+      },
+      "/graph": {
+        target: "http://localhost:9621",
+        changeOrigin: true,
+      },
+      "/feedback": {
+        target: "http://localhost:9621",
+        changeOrigin: true,
+      },
+      "/admin": {
+        target: "http://localhost:9621",
+        changeOrigin: true,
+      },
       "/ws": {
         target: "ws://localhost:9621",
         ws: true,

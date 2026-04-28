@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from semanrag.evaluation.runner import EvalRecord, EvalReport, run_eval
+from semanrag.evaluation.runner import EvalRecord, run_eval
 
 
 async def run_ab_prompt(

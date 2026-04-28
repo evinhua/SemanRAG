@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+from unittest.mock import AsyncMock, patch
+
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+
+asyncpg = pytest.importorskip("asyncpg")
 
 
 @pytest.fixture()
@@ -23,7 +26,7 @@ async def test_table_creation(mock_pool):
     pool, conn = mock_pool
 
     with patch("asyncpg.create_pool", new_callable=AsyncMock, return_value=pool):
-        from semanrag.kg.postgres_impl import PostgreSQLDB, PGKVStorage
+        from semanrag.kg.postgres_impl import PGKVStorage, PostgreSQLDB
 
         db = PostgreSQLDB({"pg_host": "localhost", "pg_database": "test"})
         db._pool = pool
@@ -49,7 +52,7 @@ async def test_index_creation(mock_pool):
     pool, conn = mock_pool
 
     with patch("asyncpg.create_pool", new_callable=AsyncMock, return_value=pool):
-        from semanrag.kg.postgres_impl import PostgreSQLDB, PGKVStorage
+        from semanrag.kg.postgres_impl import PGKVStorage, PostgreSQLDB
 
         db = PostgreSQLDB({"pg_host": "localhost", "pg_database": "test"})
         db._pool = pool

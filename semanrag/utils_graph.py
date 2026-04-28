@@ -8,7 +8,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from semanrag.base import BaseGraphStorage, BaseLexicalStorage, BaseVectorStorage
-from semanrag.operate import _merge_nodes_then_upsert, build_communities
+from semanrag.operate import build_communities
 from semanrag.utils import EmbeddingFunc, compute_mdhash_id, logger
 
 # ── module-level edit history ────────────────────────────────────────────

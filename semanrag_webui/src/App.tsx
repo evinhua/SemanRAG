@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Layout } from "@/components/Layout";
@@ -21,6 +21,17 @@ function Loading() {
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
+  const [authRequired, setAuthRequired] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    fetch("/api/health")
+      .then((r) => r.json())
+      .then((data) => setAuthRequired(data.auth_required === true))
+      .catch(() => setAuthRequired(false));
+  }, []);
+
+  if (authRequired === null) return <Loading />;
+  if (!authRequired) return <>{children}</>;
   if (!isAuthenticated()) return <Navigate to="/login" replace />;
   return <>{children}</>;
 }
@@ -40,9 +51,9 @@ export default function App() {
                     <Suspense fallback={<Loading />}>
                       <Routes>
                         <Route path="/chat" element={<ChatPage />} />
-                        <Route path="/graph" element={<GraphPage />} />
-                        <Route path="/documents" element={<DocumentsPage />} />
-                        <Route path="/admin" element={<AdminPage />} />
+                        <Route path="/explore" element={<GraphPage />} />
+                        <Route path="/files" element={<DocumentsPage />} />
+                        <Route path="/admin-panel" element={<AdminPage />} />
                         <Route path="/settings" element={<SettingsPage />} />
                         <Route path="*" element={<Navigate to="/chat" replace />} />
                       </Routes>

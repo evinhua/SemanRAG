@@ -13,9 +13,9 @@ import * as Toast from "@radix-ui/react-toast";
 
 const NAV = [
   { to: "/chat", icon: MessageSquare, label: "Chat" },
-  { to: "/graph", icon: Network, label: "Graph" },
-  { to: "/documents", icon: FileText, label: "Documents" },
-  { to: "/admin", icon: Shield, label: "Admin" },
+  { to: "/explore", icon: Network, label: "Graph" },
+  { to: "/files", icon: FileText, label: "Documents" },
+  { to: "/admin-panel", icon: Shield, label: "Admin" },
   { to: "/settings", icon: Settings, label: "Settings" },
 ] as const;
 

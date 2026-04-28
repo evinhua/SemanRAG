@@ -26,10 +26,10 @@ env-security-check:
 # ── Quality ──────────────────────────────────────────────────────
 .PHONY: lint typecheck test test-integration eval
 lint:
-	ruff check src/ tests/
+	ruff check semanrag/ tests/
 
 typecheck:
-	mypy src/
+	mypy semanrag/
 
 test:
 	pytest tests/

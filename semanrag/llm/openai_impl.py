@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import os
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 
 import numpy as np
 
@@ -62,6 +62,8 @@ async def openai_complete_if_cache(
                 model=model, messages=messages, stream=True, **request_kwargs
             )
             async for chunk in resp:
+                if not chunk.choices:
+                    continue
                 delta = chunk.choices[0].delta.content if chunk.choices[0].delta.content else ""
                 if delta:
                     yield delta
@@ -134,6 +136,8 @@ async def azure_openai_complete_if_cache(
                 model=model, messages=messages, stream=True, **request_kwargs
             )
             async for chunk in resp:
+                if not chunk.choices:
+                    continue
                 delta = chunk.choices[0].delta.content if chunk.choices[0].delta.content else ""
                 if delta:
                     yield delta

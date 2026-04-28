@@ -69,7 +69,7 @@ class FaissVectorDBStorage(BaseVectorStorage):
             self._index = faiss.read_index(self._index_path)
         if os.path.exists(self._sidecar_path):
             try:
-                with open(self._sidecar_path, "r", encoding="utf-8") as f:
+                with open(self._sidecar_path, encoding="utf-8") as f:
                     sidecar = json.load(f)
                 self._meta = {int(k): v for k, v in sidecar.get("meta", {}).items()}
                 self._id_to_pos = sidecar.get("id_to_pos", {})
@@ -176,11 +176,7 @@ class FaissVectorDBStorage(BaseVectorStorage):
             user_groups = acl_filter.get("user_groups", [])
             filtered = []
             for r in results:
-                if r.get("acl_public", True):
-                    filtered.append(r)
-                elif user_id and (r.get("acl_owner") == user_id or user_id in r.get("acl_visible_to_users", [])):
-                    filtered.append(r)
-                elif user_groups and set(user_groups) & set(r.get("acl_visible_to_groups", [])):
+                if r.get("acl_public", True) or user_id and (r.get("acl_owner") == user_id or user_id in r.get("acl_visible_to_users", [])) or user_groups and set(user_groups) & set(r.get("acl_visible_to_groups", [])):
                     filtered.append(r)
             results = filtered
 

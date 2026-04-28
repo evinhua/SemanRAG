@@ -1,9 +1,9 @@
 """Benchmark entity resolution with mock embeddings at varying scales."""
 
 import time
+
 import numpy as np
 import pytest
-
 
 CANDIDATE_COUNTS = [100, 1000, 10000]
 
