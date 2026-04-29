@@ -31,7 +31,7 @@ COPY --from=frontend /app/semanrag_webui/dist /app/static
 ENV SEMANRAG_STATIC_DIR=/app/static
 
 RUN groupadd -r semanrag && useradd -r -g semanrag semanrag \
-    && mkdir -p /app/data && chown -R semanrag:semanrag /app
+    && mkdir -p /app/data /app/data/inbox && chown -R semanrag:semanrag /app
 
 USER semanrag
 

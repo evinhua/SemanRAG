@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import * as d3 from "d3";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { graphApi, type GraphData } from "@/lib/semanrag";
 
 interface NodeDatum extends d3.SimulationNodeDatum {
@@ -67,9 +66,8 @@ export default function GraphPage() {
     setNodeCount(nodes.length);
     setEdgeCount(links.length);
 
-    // Color by type
     const types = [...new Set(nodes.map((n) => n.type || "Other"))];
-    const color = d3.scaleOrdinal(d3.schemeTableau10).domain(types);
+    const color = d3.scaleOrdinal(["#1174e6", "#288964", "#e66e19", "#8e45b0", "#dc2d37", "#0d5bbd", "#767676"]).domain(types);
 
     const simulation = d3.forceSimulation(nodes)
       .force("link", d3.forceLink<NodeDatum, LinkDatum>(links).id((d) => d.id).distance(80))
@@ -77,7 +75,6 @@ export default function GraphPage() {
       .force("center", d3.forceCenter(width / 2, height / 2))
       .force("collision", d3.forceCollide().radius(20));
 
-    // Zoom
     const g = svg.append("g");
     svg.call(
       d3.zoom<SVGSVGElement, unknown>()
@@ -85,16 +82,14 @@ export default function GraphPage() {
         .on("zoom", (event) => g.attr("transform", event.transform))
     );
 
-    // Links
     const link = g.append("g")
-      .attr("stroke", "#999")
-      .attr("stroke-opacity", 0.4)
+      .attr("stroke", "#dcdcdc")
+      .attr("stroke-opacity", 0.6)
       .selectAll("line")
       .data(links)
       .join("line")
       .attr("stroke-width", 1);
 
-    // Nodes
     const node = g.append("g")
       .selectAll("circle")
       .data(nodes)
@@ -123,7 +118,6 @@ export default function GraphPage() {
           }) as any
       );
 
-    // Labels (only for larger nodes)
     const labels = g.append("g")
       .selectAll("text")
       .data(nodes.filter((n) => (n.degree || 0) > 3))
@@ -132,9 +126,8 @@ export default function GraphPage() {
       .attr("font-size", 9)
       .attr("dx", 12)
       .attr("dy", 4)
-      .attr("fill", "#374151");
+      .attr("fill", "#242424");
 
-    // Tooltip on hover
     node.append("title").text((d) => d.label);
 
     simulation.on("tick", () => {
@@ -147,7 +140,6 @@ export default function GraphPage() {
       labels.attr("x", (d) => d.x!).attr("y", (d) => d.y!);
     });
 
-    // Highlight search
     if (search) {
       const lower = search.toLowerCase();
       node.attr("opacity", (d) => d.label.toLowerCase().includes(lower) ? 1 : 0.15);
@@ -158,39 +150,54 @@ export default function GraphPage() {
   useEffect(() => { loadGraph(); }, [loadGraph]);
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] gap-4">
+    <div className="flex h-[calc(100vh-7rem)] gap-4">
       {/* Sidebar */}
-      <div className="w-64 shrink-0 space-y-3 overflow-auto p-2">
-        <h2 className="font-semibold text-lg">Graph Explorer</h2>
-        <div className="text-xs text-muted-foreground">
-          {nodeCount} nodes · {edgeCount} edges
+      <div className="w-64 shrink-0 space-y-4 overflow-auto">
+        <h2 className="font-bold text-base">Knowledge Graph</h2>
+
+        {/* KPI row */}
+        <div className="flex gap-3">
+          <div className="kpi-card flex-1 !p-3">
+            <div className="text-xl font-bold text-eds-blue">{nodeCount}</div>
+            <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Nodes</div>
+          </div>
+          <div className="kpi-card green flex-1 !p-3">
+            <div className="text-xl font-bold text-eds-green">{edgeCount}</div>
+            <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Edges</div>
+          </div>
         </div>
+
         <Input
           placeholder="Search nodes…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && loadGraph()}
+          className="rounded-sm"
         />
         <Button size="sm" variant="outline" className="w-full" onClick={loadGraph}>
-          Reload
+          Reload Graph
         </Button>
 
         {selectedNode && (
-          <div className="border rounded-lg p-3 space-y-2 text-sm">
-            <div className="font-medium">{selectedNode.label}</div>
-            <Badge variant="secondary">{selectedNode.type || "Other"}</Badge>
+          <div className="border-t pt-3 space-y-2">
+            <div className="font-semibold text-sm">{selectedNode.label}</div>
+            <span className="status-badge info">{selectedNode.type || "Other"}</span>
             {selectedNode.description && (
-              <p className="text-xs text-muted-foreground line-clamp-6">{selectedNode.description}</p>
+              <p className="text-xs text-muted-foreground line-clamp-6 mt-2">{selectedNode.description}</p>
+            )}
+            {selectedNode.degree != null && (
+              <div className="text-xs text-muted-foreground">Degree: {selectedNode.degree}</div>
             )}
           </div>
         )}
       </div>
 
       {/* Graph canvas */}
-      <div className="flex-1 relative border rounded-lg overflow-hidden bg-white dark:bg-gray-950">
+      <div className="flex-1 relative border rounded-sm overflow-hidden bg-white dark:bg-eds-gray-950">
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
-            <span className="text-sm text-muted-foreground">Loading graph…</span>
+            <span className="loading-spinner"></span>
+            <span className="text-sm text-muted-foreground ml-2">Loading graph…</span>
           </div>
         )}
         <svg ref={svgRef} className="w-full h-full" />

@@ -16,11 +16,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
 import { useChatStore, type ChatMessage } from "@/stores/chat";
 import { queryApi, feedbackApi, type GroundedClaim, type CompareResponse } from "@/lib/semanrag";
-
-// ── Constants ────────────────────────────────────────────────────────
 
 const MODES = [
   { value: "local", label: "Local", tip: "Entity-centric retrieval from local subgraph" },
@@ -32,8 +29,6 @@ const MODES = [
   { value: "bypass", label: "Bypass", tip: "Direct LLM call without RAG context" },
 ] as const;
 
-// ── Grounded Check Badge ─────────────────────────────────────────────
-
 function GroundedCheckBadge({ claim }: { claim: GroundedClaim }) {
   const colors = { supported: "success", partial: "warning", unsupported: "destructive" } as const;
   return (
@@ -43,7 +38,7 @@ function GroundedCheckBadge({ claim }: { claim: GroundedClaim }) {
           <div><Badge variant={colors[claim.status]} className="cursor-help text-[10px]">{claim.status}</Badge></div>
         </Tooltip.Trigger>
         <Tooltip.Portal>
-          <Tooltip.Content className="z-50 max-w-xs rounded-md bg-card border p-3 text-xs shadow-md" sideOffset={5}>
+          <Tooltip.Content className="z-50 max-w-xs rounded-sm bg-card border p-3 text-xs shadow-md" sideOffset={5}>
             <p className="font-medium mb-1">{claim.claim}</p>
             {claim.evidence && <p className="text-muted-foreground">{claim.evidence}</p>}
           </Tooltip.Content>
@@ -53,19 +48,17 @@ function GroundedCheckBadge({ claim }: { claim: GroundedClaim }) {
   );
 }
 
-// ── Reference Tooltip ────────────────────────────────────────────────
-
 function InlineReference({ reference }: { reference: Record<string, unknown> }) {
   return (
     <Tooltip.Provider>
       <Tooltip.Root>
         <Tooltip.Trigger asChild>
-          <button className="inline text-xs text-primary underline cursor-help mx-0.5">
+          <button className="inline text-xs text-eds-blue underline cursor-help mx-0.5">
             [{String(reference.source_id ?? reference.id ?? "ref")}]
           </button>
         </Tooltip.Trigger>
         <Tooltip.Portal>
-          <Tooltip.Content className="z-50 max-w-sm rounded-md bg-card border p-3 text-xs shadow-md" sideOffset={5}>
+          <Tooltip.Content className="z-50 max-w-sm rounded-sm bg-card border p-3 text-xs shadow-md" sideOffset={5}>
             <p className="font-medium">{String(reference.source_id ?? "")}</p>
             <p className="text-muted-foreground mt-1 line-clamp-4">{String(reference.content ?? reference.description ?? "")}</p>
           </Tooltip.Content>
@@ -75,49 +68,47 @@ function InlineReference({ reference }: { reference: Record<string, unknown> }) 
   );
 }
 
-// ── Query Settings Panel ─────────────────────────────────────────────
-
 function QuerySettingsPanel() {
   const { topK, chunkTopK, enableRerank, snapshotAt, userGroups, setTopK, setChunkTopK, setEnableRerank, setSnapshotAt, setUserGroups } = useChatStore();
 
   return (
-    <div className="flex flex-wrap items-center gap-4 p-3 border rounded-lg bg-muted/30 text-sm mb-3">
-      <div className="flex items-center gap-2">
-        <Label>top_k</Label>
-        <Input type="number" value={topK} onChange={(e) => setTopK(Number(e.target.value))} className="w-20 h-8" min={1} max={100} />
-      </div>
-      <div className="flex items-center gap-2">
-        <Label>chunk_top_k</Label>
-        <Input type="number" value={chunkTopK} onChange={(e) => setChunkTopK(Number(e.target.value))} className="w-20 h-8" min={1} max={50} />
-      </div>
-      <div className="flex items-center gap-2">
-        <Label>Reranker</Label>
-        <SwitchPrimitive.Root
-          checked={enableRerank}
-          onCheckedChange={setEnableRerank}
-          className="w-9 h-5 rounded-full bg-muted data-[state=checked]:bg-primary transition-colors"
-        >
-          <SwitchPrimitive.Thumb className="block h-4 w-4 rounded-full bg-white shadow transition-transform data-[state=checked]:translate-x-4 translate-x-0.5" />
-        </SwitchPrimitive.Root>
-      </div>
-      <div className="flex items-center gap-2">
-        <Label>snapshot_at</Label>
-        <Input type="datetime-local" value={snapshotAt ?? ""} onChange={(e) => setSnapshotAt(e.target.value || null)} className="h-8" />
-      </div>
-      <div className="flex items-center gap-2">
-        <Label>ACL groups</Label>
-        <Input
-          value={userGroups.join(",")}
-          onChange={(e) => setUserGroups(e.target.value ? e.target.value.split(",") : [])}
-          placeholder="group1,group2"
-          className="w-36 h-8"
-        />
+    <div className="explanation-panel mb-4">
+      <div className="flex flex-wrap items-center gap-4 text-sm">
+        <div className="flex items-center gap-2">
+          <Label className="text-xs font-semibold uppercase text-muted-foreground">top_k</Label>
+          <Input type="number" value={topK} onChange={(e) => setTopK(Number(e.target.value))} className="w-20 h-8" min={1} max={100} />
+        </div>
+        <div className="flex items-center gap-2">
+          <Label className="text-xs font-semibold uppercase text-muted-foreground">chunk_top_k</Label>
+          <Input type="number" value={chunkTopK} onChange={(e) => setChunkTopK(Number(e.target.value))} className="w-20 h-8" min={1} max={50} />
+        </div>
+        <div className="flex items-center gap-2">
+          <Label className="text-xs font-semibold uppercase text-muted-foreground">Reranker</Label>
+          <SwitchPrimitive.Root
+            checked={enableRerank}
+            onCheckedChange={setEnableRerank}
+            className="w-9 h-5 rounded-full bg-eds-gray-300 data-[state=checked]:bg-eds-blue transition-colors"
+          >
+            <SwitchPrimitive.Thumb className="block h-4 w-4 rounded-full bg-white shadow transition-transform data-[state=checked]:translate-x-4 translate-x-0.5" />
+          </SwitchPrimitive.Root>
+        </div>
+        <div className="flex items-center gap-2">
+          <Label className="text-xs font-semibold uppercase text-muted-foreground">snapshot_at</Label>
+          <Input type="datetime-local" value={snapshotAt ?? ""} onChange={(e) => setSnapshotAt(e.target.value || null)} className="h-8" />
+        </div>
+        <div className="flex items-center gap-2">
+          <Label className="text-xs font-semibold uppercase text-muted-foreground">ACL groups</Label>
+          <Input
+            value={userGroups.join(",")}
+            onChange={(e) => setUserGroups(e.target.value ? e.target.value.split(",") : [])}
+            placeholder="group1,group2"
+            className="w-36 h-8"
+          />
+        </div>
       </div>
     </div>
   );
 }
-
-// ── Feedback Dialog ──────────────────────────────────────────────────
 
 function FeedbackDialog({ queryId, onClose }: { queryId: string; onClose: () => void }) {
   const [relevance, setRelevance] = useState(3);
@@ -131,17 +122,17 @@ function FeedbackDialog({ queryId, onClose }: { queryId: string; onClose: () => 
   };
 
   return (
-    <div className="space-y-4 p-4">
-      <h3 className="font-semibold">Rate this answer</h3>
+    <div className="space-y-4 p-5">
+      <h3 className="font-bold text-base">Rate this answer</h3>
       {(["relevance", "accuracy", "faithfulness"] as const).map((key) => {
         const val = { relevance, accuracy, faithfulness }[key];
         const setter = { relevance: setRelevance, accuracy: setAccuracy, faithfulness: setFaithfulness }[key];
         return (
           <div key={key} className="flex items-center gap-3">
-            <Label className="w-28 capitalize">{key}</Label>
+            <Label className="w-28 capitalize text-sm">{key}</Label>
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map((n) => (
-                <button key={n} onClick={() => setter(n)} className={`p-0.5 ${n <= val ? "text-yellow-500" : "text-muted-foreground/30"}`}>
+                <button key={n} onClick={() => setter(n)} className={`p-0.5 ${n <= val ? "text-eds-orange" : "text-eds-gray-300"}`}>
                   <Star className="h-4 w-4 fill-current" />
                 </button>
               ))}
@@ -158,19 +149,17 @@ function FeedbackDialog({ queryId, onClose }: { queryId: string; onClose: () => 
   );
 }
 
-// ── Message Bubble ───────────────────────────────────────────────────
-
 function MessageBubble({ msg, onRegenerate, onFeedback }: { msg: ChatMessage; onRegenerate?: () => void; onFeedback?: () => void }) {
   const isUser = msg.role === "user";
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"} mb-4`}>
-      <div className={`max-w-[80%] rounded-lg px-4 py-3 ${isUser ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+      <div className={`max-w-[80%] rounded-sm px-4 py-3 ${isUser ? "bg-eds-blue text-white" : "bg-muted"}`}>
         <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight, rehypeKatex]} className="prose prose-sm dark:prose-invert max-w-none">
           {msg.content}
         </ReactMarkdown>
 
         {msg.references && msg.references.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2 pt-2 border-t border-border/50">
+          <div className="flex flex-wrap gap-1 mt-2 pt-2 border-t border-white/20">
             {msg.references.map((r, i) => <InlineReference key={i} reference={r} />)}
           </div>
         )}
@@ -184,7 +173,7 @@ function MessageBubble({ msg, onRegenerate, onFeedback }: { msg: ChatMessage; on
         {!isUser && (
           <div className="flex items-center gap-1 mt-2 pt-2 border-t border-border/50">
             {msg.latencyMs != null && <span className="text-[10px] text-muted-foreground mr-2">{msg.latencyMs.toFixed(0)}ms</span>}
-            {msg.mode && <Badge variant="outline" className="text-[10px]">{msg.mode}</Badge>}
+            {msg.mode && <span className="status-badge info text-[10px]">{msg.mode}</span>}
             <div className="ml-auto flex gap-1">
               {onFeedback && (
                 <>
@@ -203,27 +192,25 @@ function MessageBubble({ msg, onRegenerate, onFeedback }: { msg: ChatMessage; on
   );
 }
 
-// ── Compare Panel ────────────────────────────────────────────────────
-
 function ComparePanel({ data, onClose }: { data: CompareResponse; onClose: () => void }) {
   return (
     <Dialog.Root open onOpenChange={onClose}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
-        <Dialog.Content className="fixed inset-4 z-50 rounded-lg border bg-card shadow-lg overflow-auto">
-          <div className="p-4">
-            <Dialog.Title className="text-lg font-semibold mb-4">Compare Answers</Dialog.Title>
+        <Dialog.Content className="fixed inset-6 z-50 rounded-sm border bg-card shadow-lg overflow-auto">
+          <div className="p-5">
+            <Dialog.Title className="text-base font-bold mb-4">Compare Answers</Dialog.Title>
             <div className="grid grid-cols-2 gap-4">
               {(["result_a", "result_b"] as const).map((key) => {
                 const r = data[key];
                 return (
-                  <Card key={key} className="p-4">
-                    <h3 className="font-medium mb-2 text-sm">{key === "result_a" ? "Variant A" : "Variant B"}</h3>
+                  <div key={key} className="border rounded-sm p-4 border-t-[3px] border-t-eds-blue">
+                    <h3 className="font-semibold mb-2 text-sm">{key === "result_a" ? "Variant A" : "Variant B"}</h3>
                     <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight, rehypeKatex]} className="prose prose-sm dark:prose-invert max-w-none">
                       {r.answer}
                     </ReactMarkdown>
-                    <div className="mt-2 text-xs text-muted-foreground">{r.latency_ms.toFixed(0)}ms · {r.references.length} refs</div>
-                  </Card>
+                    <div className="mt-3 text-xs text-muted-foreground">{r.latency_ms.toFixed(0)}ms · {r.references.length} refs</div>
+                  </div>
                 );
               })}
             </div>
@@ -236,8 +223,6 @@ function ComparePanel({ data, onClose }: { data: CompareResponse; onClose: () =>
     </Dialog.Root>
   );
 }
-
-// ── Export helpers ────────────────────────────────────────────────────
 
 function exportChat(messages: ChatMessage[], format: "md" | "json") {
   let content: string;
@@ -257,8 +242,6 @@ function exportChat(messages: ChatMessage[], format: "md" | "json") {
   a.click();
   URL.revokeObjectURL(url);
 }
-
-// ── Main Page ────────────────────────────────────────────────────────
 
 export default function ChatPage() {
   const store = useChatStore();
@@ -321,7 +304,6 @@ export default function ChatPage() {
         }
       }
 
-      // Fetch grounded check data
       try {
         const dataResult = await queryApi.queryData({
           query: text, mode, top_k: topK, enable_rerank: enableRerank,
@@ -376,14 +358,18 @@ export default function ChatPage() {
     <div className="flex h-full gap-4">
       {/* Thread list sidebar */}
       <div className="w-48 shrink-0 border-r pr-3 space-y-1 overflow-auto">
-        <Button variant="outline" size="sm" className="w-full mb-2" onClick={() => store.createThread()}>
+        <Button variant="outline" size="sm" className="w-full mb-3" onClick={() => store.createThread()}>
           New Chat
         </Button>
         {threads.map((t) => (
           <button
             key={t.id}
             onClick={() => store.setActiveThread(t.id)}
-            className={`w-full text-left text-sm truncate rounded px-2 py-1.5 ${t.id === activeThreadId ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent"}`}
+            className={`w-full text-left text-sm truncate rounded-sm px-3 py-2 transition-colors ${
+              t.id === activeThreadId
+                ? "bg-eds-blue-light text-eds-blue font-medium dark:bg-[#0d2137]"
+                : "text-muted-foreground hover:bg-accent"
+            }`}
           >
             {t.title}
           </button>
@@ -395,24 +381,24 @@ export default function ChatPage() {
         {/* Top controls */}
         <div className="flex items-center gap-3 mb-3 flex-wrap">
           <Select.Root value={mode} onValueChange={store.setMode}>
-            <Select.Trigger className="inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm bg-background">
+            <Select.Trigger className="inline-flex items-center gap-2 rounded-sm border px-3 py-1.5 text-sm bg-background hover:bg-accent transition-colors">
               <Select.Value />
               <ChevronDown className="h-3 w-3" />
             </Select.Trigger>
             <Select.Portal>
-              <Select.Content className="z-50 rounded-md border bg-card shadow-md">
+              <Select.Content className="z-50 rounded-sm border bg-card shadow-md">
                 <Select.Viewport className="p-1">
                   {MODES.map((m) => (
                     <Tooltip.Provider key={m.value}>
                       <Tooltip.Root>
                         <Tooltip.Trigger asChild>
-                          <Select.Item value={m.value} className="flex items-center gap-2 rounded px-3 py-1.5 text-sm cursor-pointer outline-none data-[highlighted]:bg-accent">
+                          <Select.Item value={m.value} className="flex items-center gap-2 rounded-sm px-3 py-1.5 text-sm cursor-pointer outline-none data-[highlighted]:bg-accent">
                             <Select.ItemText>{m.label}</Select.ItemText>
                             <Select.ItemIndicator><Check className="h-3 w-3" /></Select.ItemIndicator>
                           </Select.Item>
                         </Tooltip.Trigger>
                         <Tooltip.Portal>
-                          <Tooltip.Content side="right" className="z-[60] rounded bg-card border px-2 py-1 text-xs shadow" sideOffset={8}>
+                          <Tooltip.Content side="right" className="z-[60] rounded-sm bg-card border px-2 py-1 text-xs shadow" sideOffset={8}>
                             {m.tip}
                           </Tooltip.Content>
                         </Tooltip.Portal>
@@ -453,7 +439,22 @@ export default function ChatPage() {
               onFeedback={msg.role === "assistant" ? () => setFeedbackMsgId(msg.id) : undefined}
             />
           ))}
-          {!thread && <p className="text-center text-muted-foreground mt-20">Start a new conversation</p>}
+          {!thread && (
+            <div className="text-center mt-20">
+              <p className="text-muted-foreground mb-4">Start a new conversation</p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {["What entities are in the knowledge graph?", "Summarize the main themes", "Find relationships between concepts"].map((q) => (
+                  <button
+                    key={q}
+                    onClick={() => { setInput(q); }}
+                    className="text-xs px-3 py-1.5 bg-eds-blue-light border border-eds-blue rounded-sm text-eds-blue hover:bg-eds-blue hover:text-white transition-colors dark:bg-[#0d2137] dark:border-eds-blue"
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           <div ref={bottomRef} />
         </div>
 
@@ -465,7 +466,7 @@ export default function ChatPage() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Ask a question… (Ctrl+Enter to send)"
-              className="flex-1 min-h-[44px] max-h-32 resize-none"
+              className="flex-1 min-h-[44px] max-h-32 resize-none rounded-sm"
               rows={1}
               disabled={streaming}
             />
@@ -481,7 +482,7 @@ export default function ChatPage() {
         <Dialog.Root open onOpenChange={() => setFeedbackMsgId(null)}>
           <Dialog.Portal>
             <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
-            <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-card shadow-lg">
+            <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-sm border bg-card shadow-lg">
               <Dialog.Title className="sr-only">Feedback</Dialog.Title>
               <FeedbackDialog queryId={feedbackMsgId} onClose={() => setFeedbackMsgId(null)} />
             </Dialog.Content>

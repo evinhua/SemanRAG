@@ -224,6 +224,15 @@ export const documentsApi = {
     if (!res.ok) throw new ApiError(res.status, "Upload failed");
     return res.json() as Promise<unknown>;
   },
+  inboxUpload: async (file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch(`${BASE}/documents/inbox/upload`, { method: "POST", headers: getAuthHeaders(), body: form });
+    if (!res.ok) throw new ApiError(res.status, "Inbox copy failed");
+    return res.json() as Promise<{ file: string; status: string; path: string }>;
+  },
+  inboxList: () => request<{ files: { file: string; size: number }[] }>("/documents/inbox"),
+  inboxScan: () => request<{ files: string[]; message: string }>("/documents/inbox/scan", { method: "POST" }),
   pipelineStatus: () => request<PipelineStatus>("/documents/pipeline-status"),
 };
 

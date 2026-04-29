@@ -268,6 +268,90 @@ async def pipeline_cancel(request: Request):
     return {"cancelled": cancelled}
 
 
+# ── Inbox-based upload (copy to volume, then scan) ───────────────────
+
+INBOX_DIR = os.environ.get(
+    "SEMANRAG_INBOX_DIR",
+    os.path.join(os.environ.get("WORKING_DIR", "./semanrag_data"), "inbox"),
+)
+
+
+@router.post("/inbox/upload", status_code=201)
+async def inbox_upload(file: UploadFile = File(...)):
+    """Copy file to inbox volume without ingestion. Fast file transfer only."""
+    os.makedirs(INBOX_DIR, exist_ok=True)
+    fname = file.filename or "unnamed"
+    dest = os.path.join(INBOX_DIR, fname)
+    try:
+        with open(dest, "wb") as f:
+            while chunk := await file.read(1024 * 1024):
+                f.write(chunk)
+        return {"file": fname, "status": "copied", "path": dest}
+    except Exception as exc:
+        raise HTTPException(500, f"Failed to copy {fname}: {exc}")
+
+
+@router.get("/inbox")
+async def inbox_list():
+    """List files currently in the inbox (queued or waiting for ingestion)."""
+    if not os.path.isdir(INBOX_DIR):
+        return {"files": []}
+    supported = {".pdf", ".docx", ".pptx", ".xlsx", ".txt", ".md", ".csv"}
+    files = []
+    for fname in sorted(os.listdir(INBOX_DIR)):
+        fpath = os.path.join(INBOX_DIR, fname)
+        if os.path.isfile(fpath) and os.path.splitext(fname)[1].lower() in supported:
+            files.append({"file": fname, "size": os.path.getsize(fpath)})
+    return {"files": files}
+
+
+@router.post("/inbox/scan")
+async def inbox_scan(request: Request):
+    """Scan inbox directory and enqueue files for background ingestion."""
+    from fastapi.responses import JSONResponse
+    import asyncio
+
+    rag = request.app.state.rag
+    if not os.path.isdir(INBOX_DIR):
+        return JSONResponse(content={"files": [], "message": "Inbox empty"})
+
+    supported = {".pdf", ".docx", ".pptx", ".xlsx", ".txt", ".md", ".csv"}
+    files_found = []
+    for fname in sorted(os.listdir(INBOX_DIR)):
+        fpath = os.path.join(INBOX_DIR, fname)
+        if not os.path.isfile(fpath):
+            continue
+        ext = os.path.splitext(fname)[1].lower()
+        if ext not in supported:
+            continue
+        files_found.append({"file": fname, "path": fpath, "ext": ext})
+
+    if not files_found:
+        return JSONResponse(content={"files": [], "message": "No supported files in inbox"})
+
+    # Process in background
+    async def _ingest_files():
+        for item in files_found:
+            fpath, ext, fname = item["path"], item["ext"], item["file"]
+            try:
+                if ext in {".pdf", ".docx", ".pptx", ".xlsx"}:
+                    await rag.ainsert("", file_paths=[fpath])
+                else:
+                    with open(fpath, encoding="utf-8", errors="replace") as f:
+                        text = f.read()
+                    await rag.ainsert(text, file_paths=[fpath])
+                os.unlink(fpath)
+            except Exception:
+                pass  # File stays in inbox for retry
+
+    asyncio.create_task(_ingest_files())
+
+    return JSONResponse(content={
+        "files": [f["file"] for f in files_found],
+        "message": f"Enqueued {len(files_found)} files for ingestion",
+    })
+
+
 @router.get("/{doc_id}")
 async def get_document(doc_id: str, request: Request):
     rag = request.app.state.rag

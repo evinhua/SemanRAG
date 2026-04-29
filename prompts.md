@@ -832,3 +832,55 @@ Benchmarks:
 19. tests/bench/ micro-benchmarks for chunking, RRF fusion, entity resolution, community detection on 10k / 100k / 1M edge graphs.
 20. End-to-end ingestion throughput and query latency regression tests (nightly CI, not per-PR).
 ```
+
+---
+
+## Post-Implementation: Knowledge Graph Builder Details
+
+> Added after initial 18-phase implementation to document the KG construction pipeline internals.
+
+### Pipeline Implementation (`semanrag/operate.py`)
+
+The KG builder pipeline is triggered by `rag.ainsert()` and executes these stages sequentially per document:
+
+```
+parse_pdf/docx/pptx/xlsx → chunking_by_token_size → extract_entities → resolve_entities → _merge_nodes_then_upsert → _merge_edges_then_upsert → build_communities
+```
+
+**Key functions:**
+- `extract_entities(chunks, llm_func, ...)` — Sends each chunk to the LLM with a structured extraction prompt. Returns `ExtractionResult` containing entities and relations with confidence scores.
+- `_extract_from_chunk(chunk, llm_func)` — Single-chunk extraction with JSON parsing and fallback to delimiter-based parsing.
+- `resolve_entities(entities, embedding_func, llm_func)` — Three-stage deduplication: embedding blocking → edit distance scoring → LLM adjudication.
+- `_merge_nodes_then_upsert(entities, graph_storage, vector_storage)` — Upserts entity nodes with embeddings, merges descriptions for existing entities.
+- `_merge_edges_then_upsert(relations, graph_storage, vector_storage)` — Upserts relation edges with embeddings, accumulates weights for existing edges.
+- `build_communities(graph_storage, llm_func)` — Runs Leiden algorithm, generates LLM summaries per community.
+
+**Extraction prompt** (`semanrag/prompt.py`):
+- Instructs LLM to output structured JSON with entities (name, type, description, confidence) and relations (source, target, keywords, description, weight).
+- Supports "gleaning" — additional extraction passes on the same chunk to improve recall.
+- Confidence threshold filtering removes low-confidence extractions before graph upsert.
+
+**Graph storage operations** (`semanrag/utils_graph.py`):
+- `aedit_entity` / `aedit_relation` — Edit with history tracking
+- `amerge_entities` — Merge two entities, redirect all edges, combine descriptions
+- `afind_path` — Shortest path between two entities
+- `aneighborhood` — N-hop subgraph retrieval
+- `arun_entity_resolution` — Standalone resolution pass
+- `aincremental_community_update` — Update communities without full rebuild
+
+### Doc ID Generation Fix
+
+When ingesting files via `ainsert("", file_paths=["file.pdf"])`, the doc ID is now computed from the file path (not the empty content string) to ensure each file gets a unique ID:
+
+```python
+ids = [compute_mdhash_id(fp if fp and not c else c, prefix="doc-") for c, fp in zip(content, file_paths)]
+```
+
+### Inbox Upload Flow
+
+For stable file transfer to Docker deployments:
+1. `POST /documents/inbox/upload` — Streams file to `$WORKING_DIR/inbox/` (fast copy, no ingestion)
+2. `POST /documents/inbox/scan` — Enqueues all inbox files for background ingestion via `asyncio.create_task`
+3. `GET /documents/inbox` — Lists files currently in inbox (queued/processing)
+
+Files are removed from inbox after successful ingestion.

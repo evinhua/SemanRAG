@@ -260,6 +260,91 @@ Pages: `/chat`, `/explore` (graph), `/files` (documents), `/admin-panel`, `/sett
 
 ---
 
+## Knowledge Graph Builder
+
+SemanRAG automatically constructs a knowledge graph from ingested documents through a multi-stage pipeline:
+
+### Pipeline Stages
+
+```
+Document → Parse → Chunk → Extract (LLM) → Resolve → Upsert → Communities → Index
+```
+
+1. **Parsing** — Extracts text from PDF (text + tables + figures), DOCX, PPTX, XLSX, Markdown, and plain text files.
+
+2. **Chunking** — Splits content into processable segments:
+   - `token` — Fixed token-size chunks (default 1200 tokens, 100 overlap)
+   - `semantic` — Splits at embedding-drift boundaries
+   - `structure` — Respects document structure (headings, sections)
+
+3. **Entity & Relation Extraction** — LLM extracts structured knowledge from each chunk:
+   - **Entities**: name, type, description, confidence score
+   - **Relations**: source entity → target entity, keywords, description, weight
+   - Optional extra "gleaning" passes (`entity_extract_max_gleaning`) for higher recall
+   - Confidence threshold filtering (default 0.3)
+
+4. **Entity Resolution** — Deduplicates similar entities:
+   - Embedding similarity blocking (finds merge candidates)
+   - Edit distance scoring (fuzzy name matching)
+   - LLM adjudication (confirms whether candidates are the same entity)
+   - Description merging for confirmed duplicates
+
+5. **Graph Upsert** — Persists the knowledge graph:
+   - Upsert nodes (entities) with embedding vectors
+   - Upsert edges (relations) with embedding vectors
+   - Link source chunks to entities for provenance
+   - Temporal edges with `valid_from`/`valid_to` for point-in-time queries
+
+6. **Community Detection** — Discovers thematic clusters:
+   - Leiden algorithm for hierarchical clustering
+   - Configurable depth levels (default: 3)
+   - LLM-generated summary per community
+   - Incremental updates on new document ingestion
+
+7. **Indexing** — Enables fast retrieval:
+   - Entity embeddings → vector store
+   - Relation embeddings → vector store
+   - Chunk embeddings → vector store
+   - All text → BM25 lexical index (hybrid search)
+
+### Configuration
+
+```python
+SemanRAG(
+    chunk_token_size=1200,          # Tokens per chunk
+    chunk_overlap_token_size=100,   # Overlap between chunks
+    chunking_strategy="token",      # "token" | "semantic" | "structure"
+    entity_extract_max_gleaning=1,  # Extra extraction passes
+    confidence_threshold=0.3,       # Min confidence to keep entities
+    enable_entity_resolution=True,  # Deduplicate similar entities
+    enable_community_detection=True,# Leiden community clustering
+    community_levels=3,             # Hierarchy depth
+)
+```
+
+### Graph Operations
+
+```bash
+# Export knowledge graph
+semanrag graph export --format json --output kg.json
+
+# API: Get full graph
+curl http://localhost:9621/graph
+
+# API: Get entity neighborhood (2 hops)
+curl http://localhost:9621/graph/neighborhood/EntityName?hops=2
+
+# API: Find path between entities
+curl "http://localhost:9621/graph/path?src=EntityA&tgt=EntityB"
+
+# API: Merge duplicate entities
+curl -X POST http://localhost:9621/graph/entities/merge \
+  -H "Content-Type: application/json" \
+  -d '{"source": "Entity A", "target": "Entity B"}'
+```
+
+---
+
 ## Retrieval Modes
 
 | Mode | What it does | Best for |

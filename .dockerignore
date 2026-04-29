@@ -1,0 +1,8 @@
+semanrag_webui/node_modules
+semanrag_webui/dist
+__pycache__
+*.pyc
+.git
+.env
+data/
+semanrag_data/

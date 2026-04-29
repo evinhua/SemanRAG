@@ -53,6 +53,27 @@
 | HyDE generator | Produce hypothetical answer for embedding |
 | Keyword extractor | High-level + low-level keyword JSON extraction |
 
+## Knowledge Graph Builder
+
+The KG builder is the core differentiator — it transforms unstructured documents into a queryable knowledge graph.
+
+| Stage | Implementation | Key Libraries |
+|---|---|---|
+| Parsing | `parse_pdf`, `parse_docx`, `parse_pptx`, `parse_xlsx` | `pypdf`, `pdfplumber`, `python-docx`, `python-pptx`, `openpyxl` |
+| Chunking | `chunking_by_token_size`, `chunking_semantic`, `chunking_structure_aware` | `tiktoken`, custom embedding-drift |
+| Entity extraction | LLM structured output → `ExtractionResult` | Any LLM provider (JSON mode / tool calling) |
+| Entity resolution | Embedding blocking → edit distance → LLM adjudication | `rapidfuzz`, embedding similarity |
+| Graph upsert | `_merge_nodes_then_upsert`, `_merge_edges_then_upsert` | `networkx` / Neo4j / PostgreSQL AGE |
+| Community detection | Leiden algorithm → LLM summary generation | `graspologic` (Leiden), LLM |
+| Indexing | Embed entities + relations + chunks → vector store + BM25 | `nano-vectordb` / Milvus / Qdrant, `rank-bm25` |
+
+**Design decisions:**
+- Extraction uses structured output (JSON schema) when the LLM supports it, with delimiter-based fallback parsing via `json_repair`
+- Entity resolution runs in three passes to balance precision (LLM adjudication) with cost (only candidates above embedding similarity threshold reach the LLM)
+- Community detection uses Leiden (not Louvain) for better modularity and hierarchical support
+- Temporal edges (`valid_from`/`valid_to`) enable point-in-time graph queries
+- Doc IDs are computed from file paths (for binary files) or content hashes (for text), ensuring uniqueness
+
 ## API Server
 
 | Component | Library | Purpose |

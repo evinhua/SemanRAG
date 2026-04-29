@@ -8,11 +8,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { adminApi, documentsApi } from "@/lib/semanrag";
-
-// ── Users & Groups Tab ───────────────────────────────────────────────
 
 function UsersTab() {
   const [users, setUsers] = useState<string[]>([]);
@@ -25,27 +22,25 @@ function UsersTab() {
 
   return (
     <div className="grid grid-cols-2 gap-4">
-      <Card>
-        <CardHeader><CardTitle className="text-base">Users</CardTitle></CardHeader>
+      <Card className="border-t-[3px] border-t-eds-blue">
+        <CardHeader><CardTitle>Users</CardTitle></CardHeader>
         <CardContent>
           {users.length === 0 ? <p className="text-sm text-muted-foreground">No users tracked yet</p> : (
-            <ul className="space-y-1">{users.map((u) => <li key={u} className="text-sm flex items-center gap-2"><Users className="h-3 w-3" />{u}</li>)}</ul>
+            <ul className="space-y-1">{users.map((u) => <li key={u} className="text-sm flex items-center gap-2"><Users className="h-3 w-3 text-eds-blue" />{u}</li>)}</ul>
           )}
         </CardContent>
       </Card>
-      <Card>
-        <CardHeader><CardTitle className="text-base">Groups</CardTitle></CardHeader>
+      <Card className="border-t-[3px] border-t-eds-purple">
+        <CardHeader><CardTitle>Groups</CardTitle></CardHeader>
         <CardContent>
           {groups.length === 0 ? <p className="text-sm text-muted-foreground">No groups found</p> : (
-            <div className="flex flex-wrap gap-2">{groups.map((g) => <Badge key={g} variant="outline">{g}</Badge>)}</div>
+            <div className="flex flex-wrap gap-2">{groups.map((g) => <span key={g} className="status-badge purple">{g}</span>)}</div>
           )}
         </CardContent>
       </Card>
     </div>
   );
 }
-
-// ── Token Usage Tab ──────────────────────────────────────────────────
 
 function TokenUsageTab() {
   const [report, setReport] = useState<{ user_usage: Record<string, number>; workspace_usage: Record<string, number> } | null>(null);
@@ -63,17 +58,17 @@ function TokenUsageTab() {
   return (
     <div className="space-y-4">
       <Card>
-        <CardHeader><CardTitle className="text-base">Token Usage by User</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Token Usage by User</CardTitle></CardHeader>
         <CardContent>
           {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
+                <CartesianGrid strokeDasharray="3 3" stroke="#ebebeb" />
+                <XAxis dataKey="name" fontSize={12} />
+                <YAxis fontSize={12} />
                 <RechartsTooltip />
                 <Legend />
-                <Bar dataKey="tokens" fill="hsl(var(--primary))" name="Tokens used" />
+                <Bar dataKey="tokens" fill="#1174e6" name="Tokens used" radius={[2, 2, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : (
@@ -83,16 +78,16 @@ function TokenUsageTab() {
       </Card>
 
       <Card>
-        <CardHeader><CardTitle className="text-base">Budget Configuration</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Budget Configuration</CardTitle></CardHeader>
         <CardContent>
           <div className="flex items-end gap-4">
             <div>
-              <Label>Max tokens/user/day</Label>
-              <Input type="number" value={budgetUser} onChange={(e) => setBudgetUser(Number(e.target.value))} className="w-40" />
+              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Max tokens/user/day</Label>
+              <Input type="number" value={budgetUser} onChange={(e) => setBudgetUser(Number(e.target.value))} className="w-40 mt-1" />
             </div>
             <div>
-              <Label>Max tokens/workspace/day</Label>
-              <Input type="number" value={budgetWs} onChange={(e) => setBudgetWs(Number(e.target.value))} className="w-40" />
+              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Max tokens/workspace/day</Label>
+              <Input type="number" value={budgetWs} onChange={(e) => setBudgetWs(Number(e.target.value))} className="w-40 mt-1" />
             </div>
             <Button onClick={saveBudget}>Save Budget</Button>
           </div>
@@ -101,8 +96,6 @@ function TokenUsageTab() {
     </div>
   );
 }
-
-// ── Cache Tab ────────────────────────────────────────────────────────
 
 function CacheTab() {
   const [purging, setPurging] = useState(false);
@@ -115,8 +108,9 @@ function CacheTab() {
 
   return (
     <Card>
-      <CardHeader><CardTitle className="text-base">Cache Management</CardTitle></CardHeader>
+      <CardHeader><CardTitle>Cache Management</CardTitle></CardHeader>
       <CardContent>
+        <p className="text-sm text-muted-foreground mb-4">Purge cached data to force fresh computation on next request.</p>
         <div className="flex flex-wrap gap-3">
           {["all", "llm", "vectors", "lexical"].map((scope) => (
             <Button key={scope} variant="outline" size="sm" disabled={purging} onClick={() => purge(scope)}>
@@ -128,8 +122,6 @@ function CacheTab() {
     </Card>
   );
 }
-
-// ── Pipeline Tab ─────────────────────────────────────────────────────
 
 function PipelineTab() {
   const [status, setStatus] = useState<{ pending: number; processing: number; completed: number; failed: number } | null>(null);
@@ -143,19 +135,29 @@ function PipelineTab() {
 
   return (
     <Card>
-      <CardHeader><CardTitle className="text-base">Pipeline Status</CardTitle></CardHeader>
+      <CardHeader><CardTitle>Pipeline Status</CardTitle></CardHeader>
       <CardContent>
         {status ? (
-          <div className="grid grid-cols-4 gap-4">
-            {(["pending", "processing", "completed", "failed"] as const).map((key) => (
-              <div key={key} className="text-center p-4 rounded-lg bg-muted/50">
-                <div className="text-2xl font-bold">{status[key]}</div>
-                <div className="text-xs text-muted-foreground capitalize">{key}</div>
-              </div>
-            ))}
+          <div className="grid grid-cols-4 gap-3">
+            <div className="kpi-card orange">
+              <div className="text-2xl font-bold text-eds-orange">{status.pending}</div>
+              <div className="text-[11px] uppercase tracking-wider text-muted-foreground mt-1">Pending</div>
+            </div>
+            <div className="kpi-card">
+              <div className="text-2xl font-bold text-eds-blue">{status.processing}</div>
+              <div className="text-[11px] uppercase tracking-wider text-muted-foreground mt-1">Processing</div>
+            </div>
+            <div className="kpi-card green">
+              <div className="text-2xl font-bold text-eds-green">{status.completed}</div>
+              <div className="text-[11px] uppercase tracking-wider text-muted-foreground mt-1">Completed</div>
+            </div>
+            <div className="kpi-card red">
+              <div className="text-2xl font-bold text-eds-red">{status.failed}</div>
+              <div className="text-[11px] uppercase tracking-wider text-muted-foreground mt-1">Failed</div>
+            </div>
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <div className="flex items-center gap-2"><span className="loading-spinner"></span> Loading…</div>
         )}
         <Button variant="outline" size="sm" className="mt-4" onClick={load}>
           <Activity className="h-3 w-3 mr-1" /> Refresh
@@ -164,8 +166,6 @@ function PipelineTab() {
     </Card>
   );
 }
-
-// ── Audit Log Tab ────────────────────────────────────────────────────
 
 function AuditLogTab() {
   const [entries, setEntries] = useState<Record<string, unknown>[]>([]);
@@ -182,32 +182,32 @@ function AuditLogTab() {
 
   return (
     <Card>
-      <CardHeader><CardTitle className="text-base">Audit Log</CardTitle></CardHeader>
+      <CardHeader><CardTitle>Audit Log</CardTitle></CardHeader>
       <CardContent>
-        <div className="border rounded-lg overflow-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/50">
+        <div className="border rounded-sm overflow-auto">
+          <table className="eds-table">
+            <thead>
               <tr>
-                <th className="p-2 text-left">Timestamp</th>
-                <th className="p-2 text-left">Action</th>
-                <th className="p-2 text-left">Detail</th>
+                <th>Timestamp</th>
+                <th>Action</th>
+                <th>Detail</th>
               </tr>
             </thead>
             <tbody>
               {entries.map((e, i) => (
-                <tr key={i} className="border-t">
-                  <td className="p-2 text-muted-foreground">{String(e.timestamp ?? "")}</td>
-                  <td className="p-2"><Badge variant="outline">{String(e.action ?? "")}</Badge></td>
-                  <td className="p-2 truncate max-w-[300px]">{String(e.detail ?? "")}</td>
+                <tr key={i}>
+                  <td className="text-muted-foreground text-xs">{String(e.timestamp ?? "")}</td>
+                  <td><span className="status-badge info">{String(e.action ?? "")}</span></td>
+                  <td className="truncate max-w-[300px]">{String(e.detail ?? "")}</td>
                 </tr>
               ))}
-              {entries.length === 0 && <tr><td colSpan={3} className="p-4 text-center text-muted-foreground">No audit entries</td></tr>}
+              {entries.length === 0 && <tr><td colSpan={3} className="!py-8 text-center text-muted-foreground">No audit entries</td></tr>}
             </tbody>
           </table>
         </div>
         <div className="flex items-center justify-between mt-3">
           <span className="text-xs text-muted-foreground">{total} entries</span>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}><ChevronLeft className="h-3 w-3" /></Button>
             <span className="text-sm">{page + 1}</span>
             <Button variant="outline" size="sm" disabled={(page + 1) * pageSize >= total} onClick={() => setPage((p) => p + 1)}><ChevronRight className="h-3 w-3" /></Button>
@@ -217,8 +217,6 @@ function AuditLogTab() {
     </Card>
   );
 }
-
-// ── Evaluation Tab ───────────────────────────────────────────────────
 
 function EvalTab() {
   const [runs, setRuns] = useState<Record<string, unknown>[]>([]);
@@ -234,9 +232,6 @@ function EvalTab() {
     setRunning(false);
   };
 
-  const latest = runs[runs.length - 1];
-  const baseline = runs[runs.length - 2];
-
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
@@ -244,38 +239,40 @@ function EvalTab() {
           <Play className="h-3 w-3 mr-1" /> {running ? "Running…" : "Run Evaluation"}
         </Button>
       </div>
-      {latest && baseline && (
-        <Card>
-          <CardHeader><CardTitle className="text-base">Latest vs Baseline</CardTitle></CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div><span className="text-muted-foreground">Latest:</span> {String(latest.run_id ?? "").slice(0, 8)} — {String(latest.status ?? "")}</div>
-              <div><span className="text-muted-foreground">Baseline:</span> {String(baseline.run_id ?? "").slice(0, 8)} — {String(baseline.status ?? "")}</div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
       <Card>
-        <CardHeader><CardTitle className="text-base">Run History</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Run History</CardTitle></CardHeader>
         <CardContent>
           {runs.length === 0 ? <p className="text-sm text-muted-foreground">No evaluation runs yet</p> : (
-            <ul className="space-y-2">
-              {runs.map((r, i) => (
-                <li key={i} className="flex items-center gap-3 text-sm">
-                  <Badge variant={String(r.status) === "completed" ? "success" : "outline"}>{String(r.status ?? "")}</Badge>
-                  <span className="text-muted-foreground">{String(r.run_id ?? "").slice(0, 8)}</span>
-                  <span className="text-muted-foreground">{String(r.started_at ?? "")}</span>
-                </li>
-              ))}
-            </ul>
+            <div className="border rounded-sm overflow-auto">
+              <table className="eds-table">
+                <thead>
+                  <tr>
+                    <th>Status</th>
+                    <th>Run ID</th>
+                    <th>Started</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {runs.map((r, i) => (
+                    <tr key={i}>
+                      <td>
+                        <span className={`status-badge ${String(r.status) === "completed" ? "success" : String(r.status) === "failed" ? "error" : "info"}`}>
+                          {String(r.status ?? "")}
+                        </span>
+                      </td>
+                      <td className="font-mono text-xs">{String(r.run_id ?? "").slice(0, 8)}</td>
+                      <td className="text-muted-foreground text-xs">{String(r.started_at ?? "")}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </CardContent>
       </Card>
     </div>
   );
 }
-
-// ── PII Reports Tab ──────────────────────────────────────────────────
 
 function PiiReportsTab() {
   const [report, setReport] = useState<{ total_docs_with_pii: number; documents: Record<string, unknown>[] } | null>(null);
@@ -284,29 +281,29 @@ function PiiReportsTab() {
 
   return (
     <Card>
-      <CardHeader><CardTitle className="text-base">PII Reports</CardTitle></CardHeader>
+      <CardHeader><CardTitle>PII Reports</CardTitle></CardHeader>
       <CardContent>
         {report ? (
           <>
-            <p className="text-sm mb-3">{report.total_docs_with_pii} documents with PII findings</p>
+            <div className="notification-banner orange mb-4">
+              <strong>{report.total_docs_with_pii}</strong> documents with PII findings
+            </div>
             <div className="space-y-2">
               {report.documents.map((d, i) => (
-                <div key={i} className="border rounded p-2 text-sm">
+                <div key={i} className="border rounded-sm p-3 text-sm hover:bg-accent/50 transition-colors">
                   <div className="font-medium">{String(d.file_path ?? d.doc_id ?? "")}</div>
-                  <div className="text-xs text-muted-foreground">{(d.pii_findings as unknown[])?.length ?? 0} findings</div>
+                  <div className="text-xs text-muted-foreground mt-1">{(d.pii_findings as unknown[])?.length ?? 0} findings</div>
                 </div>
               ))}
             </div>
           </>
         ) : (
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <div className="flex items-center gap-2"><span className="loading-spinner"></span> Loading…</div>
         )}
       </CardContent>
     </Card>
   );
 }
-
-// ── Main Page ────────────────────────────────────────────────────────
 
 const TABS = [
   { value: "users", label: "Users & Groups", icon: Users },
@@ -326,7 +323,7 @@ export default function AdminPage() {
           <Tabs.Trigger
             key={value}
             value={value}
-            className="flex items-center gap-2 px-4 py-2 text-sm border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+            className="flex items-center gap-2 px-4 py-2.5 text-sm border-b-2 border-transparent data-[state=active]:border-eds-blue data-[state=active]:text-eds-blue text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
           >
             <Icon className="h-4 w-4" />
             {label}

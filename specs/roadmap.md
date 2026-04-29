@@ -110,12 +110,40 @@ This roadmap reconstructs the logical build order for SemanRAG — the sequence 
 
 ## Phase 7: Knowledge Graph Management
 
+> **Status: Implemented.** Full KG builder pipeline with entity extraction, resolution, community detection, and CRUD operations.
+
+### KG Construction Pipeline
+
+The automated pipeline runs on every `ainsert()` call:
+
+```
+Document → Parse → Chunk → Extract (LLM) → Resolve → Upsert → Communities → Index
+```
+
+- **Parsing**: PDF (text + tables + figures), DOCX, PPTX, XLSX, Markdown, plain text
+- **Chunking**: Token-based (1200 tokens, 100 overlap), semantic (embedding-drift), structure-aware (headings)
+- **Extraction**: LLM structured output → entities (name, type, description, confidence) + relations (source, target, keywords, weight)
+- **Resolution**: Embedding similarity blocking → edit distance scoring → LLM adjudication → description merging
+- **Upsert**: Nodes and edges with embeddings, source chunk provenance links, temporal edges
+- **Communities**: Leiden hierarchical clustering (3 levels) with LLM-generated summaries
+- **Indexing**: Entity/relation/chunk embeddings → vector store; all text → BM25
+
+### KG Management Operations
+
 1. Entity/relation CRUD (create, edit, delete) with edit history
 2. Entity merging with configurable strategies (concatenate, keep_first, join_unique, confidence_weighted)
 3. Document deletion with smart KG cleanup and incremental rebuilding
 4. Custom KG insertion API for programmatic ingestion
 5. Data export: CSV, Excel, Markdown, Text, **RDF/Turtle**, **GraphML**, **Cypher dump**
 6. Scheduled maintenance jobs: orphan scan, staleness scan, entity-resolution sweep, community re-detection
+
+### Inbox Upload (Docker Deployments)
+
+For stable file transfer bypassing HTTP upload timeouts:
+- `POST /documents/inbox/upload` — Stream file to volume (fast copy, no ingestion)
+- `POST /documents/inbox/scan` — Enqueue inbox files for background ingestion
+- `GET /documents/inbox` — List queued files
+- Files removed from inbox after successful ingestion
 
 ## Phase 8: Evaluation & Quality Gates
 

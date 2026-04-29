@@ -313,7 +313,10 @@ class SemanRAG:
         if isinstance(content, str):
             content = [content]
         if ids is None:
-            ids = [compute_mdhash_id(c, prefix="doc-") for c in content]
+            ids = [
+                compute_mdhash_id(fp if fp and not c else c, prefix="doc-")
+                for c, fp in zip(content, file_paths if file_paths else [""] * len(content))
+            ]
         if file_paths is None:
             file_paths = [""] * len(content)
 

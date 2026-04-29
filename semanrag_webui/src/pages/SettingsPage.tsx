@@ -36,17 +36,17 @@ const SHORTCUTS = [
 function SelectField<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: { value: T; label: string }[]; onChange: (v: T) => void }) {
   return (
     <div className="flex items-center justify-between">
-      <Label>{label}</Label>
+      <Label className="text-sm">{label}</Label>
       <Select.Root value={value} onValueChange={(v) => onChange(v as T)}>
-        <Select.Trigger className="inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm bg-background w-40 justify-between">
+        <Select.Trigger className="inline-flex items-center gap-2 rounded-sm border px-3 py-1.5 text-sm bg-background w-40 justify-between hover:bg-accent transition-colors">
           <Select.Value />
           <ChevronDown className="h-3 w-3" />
         </Select.Trigger>
         <Select.Portal>
-          <Select.Content className="z-50 rounded-md border bg-card shadow-md">
+          <Select.Content className="z-50 rounded-sm border bg-card shadow-md">
             <Select.Viewport className="p-1">
               {options.map((o) => (
-                <Select.Item key={o.value} value={o.value} className="flex items-center gap-2 rounded px-3 py-1.5 text-sm cursor-pointer outline-none data-[highlighted]:bg-accent">
+                <Select.Item key={o.value} value={o.value} className="flex items-center gap-2 rounded-sm px-3 py-1.5 text-sm cursor-pointer outline-none data-[highlighted]:bg-accent">
                   <Select.ItemText>{o.label}</Select.ItemText>
                   <Select.ItemIndicator><Check className="h-3 w-3" /></Select.ItemIndicator>
                 </Select.Item>
@@ -64,20 +64,24 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold">Settings</h1>
+      <h1 className="text-base font-bold">Settings</h1>
 
       <Card>
-        <CardHeader><CardTitle className="text-base">Appearance</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Appearance</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           {/* Theme */}
           <div className="flex items-center justify-between">
-            <Label>Theme</Label>
+            <Label className="text-sm">Theme</Label>
             <div className="flex gap-1">
               {THEMES.map(({ value, label, icon: Icon }) => (
                 <button
                   key={value}
                   onClick={() => setTheme(value)}
-                  className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors ${theme === value ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-accent"}`}
+                  className={`flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-sm transition-colors ${
+                    theme === value
+                      ? "bg-eds-blue text-white"
+                      : "bg-muted hover:bg-accent text-foreground"
+                  }`}
                 >
                   <Icon className="h-3 w-3" />
                   {label}
@@ -91,11 +95,11 @@ export default function SettingsPage() {
 
           {/* Color-blind palette */}
           <div className="flex items-center justify-between">
-            <Label>Color-blind friendly palette</Label>
+            <Label className="text-sm">Color-blind friendly palette</Label>
             <Switch.Root
               checked={colorBlind}
               onCheckedChange={setColorBlind}
-              className="w-9 h-5 rounded-full bg-muted data-[state=checked]:bg-primary transition-colors"
+              className="w-9 h-5 rounded-full bg-eds-gray-300 data-[state=checked]:bg-eds-blue transition-colors"
             >
               <Switch.Thumb className="block h-4 w-4 rounded-full bg-white shadow transition-transform data-[state=checked]:translate-x-4 translate-x-0.5" />
             </Switch.Root>
@@ -105,16 +109,16 @@ export default function SettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2">
             <Keyboard className="h-4 w-4" /> Keyboard Shortcuts
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
             {SHORTCUTS.map(({ keys, action }) => (
-              <div key={keys} className="flex items-center justify-between text-sm">
+              <div key={keys} className="flex items-center justify-between text-sm py-1 border-b border-border/50 last:border-0">
                 <span className="text-muted-foreground">{action}</span>
-                <kbd className="bg-muted px-2 py-0.5 rounded text-xs font-mono">{keys}</kbd>
+                <kbd className="bg-muted px-2 py-0.5 rounded-sm text-xs font-mono">{keys}</kbd>
               </div>
             ))}
           </div>
